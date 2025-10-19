@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.catmq</groupId>
         <artifactId>catmq</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>catmq-client</artifactId>

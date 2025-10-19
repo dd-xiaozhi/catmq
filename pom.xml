@@ -6,7 +6,7 @@
 
     <groupId>com.catmq</groupId>
     <artifactId>catmq</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <modules>
         <module>catmq-broker</module>
@@ -14,18 +14,52 @@
         <module>catmq-nameserver</module>
         <module>catmq-client</module>
         <module>catmq-cluster</module>
+        <module>catmq-store</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <revision>1.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Compiler settings properties -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+
+        <netty.version>4.1.119.Final</netty.version>
+        <fastjson2.version>2.0.43</fastjson2.version>
+
+        <!-- Test dependencies -->
+        <junit.version>4.13.2</junit.version>
     </properties>
 
     <description>CatMQ</description>
 
-    <dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
 
-    </dependencies>
-
+            <!-- model -->
+            <dependency>
+                <groupId>com.catmq</groupId>
+                <artifactId>catmq-store</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
