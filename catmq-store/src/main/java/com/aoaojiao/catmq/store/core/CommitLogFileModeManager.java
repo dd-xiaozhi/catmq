@@ -20,7 +20,7 @@ public class CommitLogFileModeManager {
         return commitLogFileModelMap.get(topicName);
     }
 
-    public void setCommitLogFileModel(CommitLogFileModel commitLogFileModel) {
+    public void put(CommitLogFileModel commitLogFileModel) {
         if (Objects.isNull(commitLogFileModel)) {
             throw new RuntimeException("commitLogFileModel is null");
         }

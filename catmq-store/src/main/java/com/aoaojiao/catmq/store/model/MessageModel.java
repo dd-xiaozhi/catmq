@@ -1,5 +1,6 @@
 package com.aoaojiao.catmq.store.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Data;
  * @author DD
  */
 @Data
+@Builder
 public class MessageModel {
 
     /**

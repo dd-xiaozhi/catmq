@@ -1,5 +1,8 @@
 package com.aoaojiao.catmq.store.core;
 
+import com.aoaojiao.catmq.common.cache.CommonCache;
+import com.aoaojiao.catmq.common.model.CatmqTopicModel;
+import com.aoaojiao.catmq.common.model.CommitLogModel;
 import com.aoaojiao.catmq.store.model.MessageModel;
 import com.aoaojiao.catmq.store.util.MMapUtil;
 
@@ -22,7 +25,7 @@ public class CommitLogFileModel {
      *
      * @param topicName
      */
-    public void loadingCommitLogFile(String topicName,
+    public void loadingFileInMMap(String topicName,
                                      int startOffset,
                                      int maxOffset) throws IOException {
         this.topicName = topicName;
@@ -37,16 +40,28 @@ public class CommitLogFileModel {
      * @return 文件路径
      */
     private String getLastNewFilePath(String topicName) {
+        CatmqTopicModel catmqTopicModel = CommonCache.CATMQ_TOPIC_MODEL_CACHE.get(topicName);
+        if (catmqTopicModel == null) {
+            throw new IllegalArgumentException(String.format("topic is valid, topicName: [ %s ]", topicName));
+        }
+        CommitLogModel commitLogModel = catmqTopicModel.getCommitLogModel();
+        String filename = commitLogModel.getFilename();
+        
+
         return null;
     }
 
 
-    public void writeContent(int offset, MessageModel messageModel) {
+    public void writeContent(MessageModel messageModel) {
         // 判断是否已经满了
     }
 
     public byte[] readContent(int offset, int offsetSize) {
 
         return MMapUtil.readContent(this.mappedByteBuffer, offset, offsetSize);
+    }
+
+    public String getTopicName() {
+        return this.topicName;
     }
 }

@@ -8,5 +8,5 @@ import com.aoaojiao.catmq.store.config.MessageStoreConfig;
 public class ConfigContext {
 
     private MessageStoreConfig messageStoreConfig;
-
+    
 }

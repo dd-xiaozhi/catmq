@@ -1,4 +1,4 @@
-package com.aoaojiao.catmq.store.model;
+package com.aoaojiao.catmq.common.model;
 
 import lombok.Data;
 
