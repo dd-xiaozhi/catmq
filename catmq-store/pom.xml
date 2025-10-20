@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.catmq</groupId>
+            <artifactId>catmq-common</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>

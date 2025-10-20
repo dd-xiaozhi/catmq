@@ -28,6 +28,8 @@
 
         <netty.version>4.1.119.Final</netty.version>
         <fastjson2.version>2.0.43</fastjson2.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <lombok.version>1.18.38</lombok.version>
 
         <!-- Test dependencies -->
         <junit.version>4.13.2</junit.version>
@@ -53,6 +55,16 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
 
             <!-- model -->
             <dependency>
@@ -60,6 +72,33 @@
                 <artifactId>catmq-store</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.catmq</groupId>
+                <artifactId>catmq-broker</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.catmq</groupId>
+                <artifactId>catmq-client</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.catmq</groupId>
+                <artifactId>catmq-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.catmq</groupId>
+                <artifactId>catmq-nameserver</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
 </project>
