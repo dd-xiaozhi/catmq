@@ -15,9 +15,9 @@ import java.io.IOException;
  */
 public class CommitLogAppendHandler {
 
-    private final static CommitLogFileModeManager COMMIT_LOG_FILE_MODE_MANAGER = new CommitLogFileModeManager();
-    
     private MessageStoreConfig messageStoreConfig;
+
+    private final static CommitLogFileModeManager COMMIT_LOG_FILE_MODE_MANAGER = new CommitLogFileModeManager();
 
     /**
      * 预加载指定 topic 的 commitLog 文件到内存中
@@ -26,7 +26,8 @@ public class CommitLogAppendHandler {
      */
     public void prepareLoadingToMMap(String topicName) throws IOException {
         CommitLogFileModel commitLogFileModel = new CommitLogFileModel();
-        commitLogFileModel.loadingFileInMMap(topicName, 0, StoreConstant.COMMIT_LOG_DEFAULT_SIZE);
+        commitLogFileModel.loadingFileInMMap(topicName, messageStoreConfig.getStorePathRootDir(),
+                0, StoreConstant.COMMIT_LOG_DEFAULT_SIZE);
         COMMIT_LOG_FILE_MODE_MANAGER.put(commitLogFileModel);
     }
 

@@ -6,6 +6,7 @@ import com.aoaojiao.catmq.common.model.CommitLogModel;
 import com.aoaojiao.catmq.store.model.MessageModel;
 import com.aoaojiao.catmq.store.util.MMapUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 
@@ -17,8 +18,8 @@ import java.nio.MappedByteBuffer;
 public class CommitLogFileModel {
 
     private String topicName;
+    private String storePath;
     private MappedByteBuffer mappedByteBuffer;
-
 
     /**
      * 加载指定主题名的 commitLog 文件
@@ -26,34 +27,32 @@ public class CommitLogFileModel {
      * @param topicName
      */
     public void loadingFileInMMap(String topicName,
-                                     int startOffset,
-                                     int maxOffset) throws IOException {
+                                  String storePath,
+                                  int startOffset,
+                                  int maxOffset) throws IOException {
         this.topicName = topicName;
-        String filePath = getLastNewFilePath(topicName);
-        this.mappedByteBuffer = MMapUtil.createMappedByteBuffer(filePath, startOffset, maxOffset);
+        this.storePath = storePath;
+        this.mappedByteBuffer = MMapUtil.createMappedByteBuffer(getFilePath(), startOffset, maxOffset);
     }
 
     /**
      * 获取最新 commitLog 文件路径
-     *
-     * @param topicName 主题名
      * @return 文件路径
      */
-    private String getLastNewFilePath(String topicName) {
-        CatmqTopicModel catmqTopicModel = CommonCache.CATMQ_TOPIC_MODEL_CACHE.get(topicName);
+    private String getFilePath() {
+        CatmqTopicModel catmqTopicModel = CommonCache.CATMQ_TOPIC_MODEL_CACHE.get(this.topicName);
         if (catmqTopicModel == null) {
-            throw new IllegalArgumentException(String.format("topic is valid, topicName: [ %s ]", topicName));
+            throw new IllegalArgumentException(String.format("topic is valid, topicName: [ %s ]", this.topicName));
         }
         CommitLogModel commitLogModel = catmqTopicModel.getCommitLogModel();
         String filename = commitLogModel.getFilename();
-        
-
-        return null;
+        // 文件路径：store目录 + topicName + 当前写入的文件名
+        return storePath + File.separator + this.topicName + File.separator + filename;
     }
 
 
     public void writeContent(MessageModel messageModel) {
-        // 判断是否已经满了
+
     }
 
     public byte[] readContent(int offset, int offsetSize) {
