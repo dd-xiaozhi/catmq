@@ -1,12 +1,12 @@
 [
     {
-        "topic": "order_pay_topic", //主题
-        "commitLogModel": { //主题对应的 commitLog 文件信息
-            "filename": "00000000", //最新的 commitLog 文件名
-            "offset": 0, //最新的commitLog文件写入地址
-            "offsetLimit": 1048576 //commitLog文件最大的写入范围
+        "topic": "order_pay_topic", 
+        "commitLogModel": {
+            "filename": "00000000",
+            "offset": 0,
+            "offsetLimit": 1048576
         },
-        "QueueModelList": [ //绑定主题的Queue列表
+        "QueueModelList": [
             {
                 "id": 0,
                 "currentOffset": 0,
@@ -26,13 +26,13 @@
         ]
     },
     {
-        "topic": "order_cancel_topic", //主题
-        "commitLogModel": { //主题对应的 commitLog 文件信息
-            "filename": "00000000", //最新的 commitLog 文件名
-            "offset": 0, //最新的commitLog文件写入地址
-            "offsetLimit": 1048576 //commitLog文件最大的写入范围
+        "topic": "order_cancel_topic",
+        "commitLogModel": {
+            "filename": "00000000",
+            "offset": 0,
+            "offsetLimit": 1048576
         },
-        "QueueModelList": [ //绑定主题的Queue列表
+        "QueueModelList": [
             {
                 "id": 0,
                 "currentOffset": 0,
@@ -50,5 +50,5 @@
                 "maxOffset": 0
             }
         ]
-    },
+    }
 ]

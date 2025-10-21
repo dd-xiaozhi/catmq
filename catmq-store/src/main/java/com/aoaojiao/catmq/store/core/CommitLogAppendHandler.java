@@ -18,6 +18,10 @@ public class CommitLogAppendHandler {
     private MessageStoreConfig messageStoreConfig;
 
     private final static CommitLogFileModeManager COMMIT_LOG_FILE_MODE_MANAGER = new CommitLogFileModeManager();
+    
+    public CommitLogAppendHandler(MessageStoreConfig messageStoreConfig) {
+        this.messageStoreConfig = messageStoreConfig;
+    }
 
     /**
      * 预加载指定 topic 的 commitLog 文件到内存中
@@ -58,7 +62,8 @@ public class CommitLogAppendHandler {
         CommitLogFileModel commitLogFileModel = getCommitLogFileModel(topicName);
         byte[] content = commitLogFileModel.readContent(startOffset, offsetSize);
         System.out.println(new String(content));
-        return null;
+        MessageModel messageModel = MessageModel.builder().content(content).build();
+        return messageModel;
     }
 
     private CommitLogFileModel getCommitLogFileModel(String topicName) throws ClassNotFoundException {

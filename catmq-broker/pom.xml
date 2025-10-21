@@ -20,6 +20,11 @@
     <dependencies>
         <dependency>
             <groupId>com.catmq</groupId>
+            <artifactId>catmq-common</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.catmq</groupId>
             <artifactId>catmq-store</artifactId>
         </dependency>
 

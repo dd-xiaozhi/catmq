@@ -9,6 +9,7 @@ import com.aoaojiao.catmq.store.util.MMapUtil;
 import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
+import java.util.Map;
 
 /**
  * commitLog 文件模型
@@ -40,7 +41,8 @@ public class CommitLogFileModel {
      * @return 文件路径
      */
     private String getFilePath() {
-        CatmqTopicModel catmqTopicModel = CommonCache.CATMQ_TOPIC_MODEL_CACHE.get(this.topicName);
+        Map<String, CatmqTopicModel> catmqTopicModelMap = CommonCache.getCatmqTopicModelMap();
+        CatmqTopicModel catmqTopicModel = catmqTopicModelMap.get(this.topicName);
         if (catmqTopicModel == null) {
             throw new IllegalArgumentException(String.format("topic is valid, topicName: [ %s ]", this.topicName));
         }
@@ -52,7 +54,8 @@ public class CommitLogFileModel {
 
 
     public void writeContent(MessageModel messageModel) {
-
+        // TODO 目前先只写入消息体
+        MMapUtil.writeContent(this.mappedByteBuffer, messageModel.getContent());
     }
 
     public byte[] readContent(int offset, int offsetSize) {
