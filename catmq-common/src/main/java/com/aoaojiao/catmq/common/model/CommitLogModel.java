@@ -21,7 +21,15 @@ public class CommitLogModel {
     private AtomicInteger offset;
 
     /**
-     * commitLog文件最大的写入范围
+     * commitLog文件最大的写入范围, MMap 可以申请的最大内存是 Integer 的最大值
      */
-    private Long offsetLimit;
+    private Integer offsetLimit;
+
+    public int addOffset(int offset) {
+        return this.offset.addAndGet(offset);
+    }
+
+    public int offsetDiff() {
+        return this.offsetLimit - this.offset.get();
+    }
 }

@@ -38,6 +38,7 @@ public class CommitLogFileModel {
 
     /**
      * 获取最新 commitLog 文件路径
+     *
      * @return 文件路径
      */
     private String getFilePath() {
@@ -54,6 +55,8 @@ public class CommitLogFileModel {
 
 
     public void writeContent(MessageModel messageModel) {
+        Map<String, CatmqTopicModel> catmqTopicModelMap = CommonCache.getCatmqTopicModelMap();
+        // 修改文件索引位置
         // TODO 目前先只写入消息体
         MMapUtil.writeContent(this.mappedByteBuffer, messageModel.getContent());
     }
