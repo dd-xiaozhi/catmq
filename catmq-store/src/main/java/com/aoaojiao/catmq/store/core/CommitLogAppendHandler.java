@@ -1,7 +1,6 @@
 package com.aoaojiao.catmq.store.core;
 
 import com.aoaojiao.catmq.store.config.MessageStoreConfig;
-import com.aoaojiao.catmq.store.constants.StoreConstant;
 import com.aoaojiao.catmq.store.model.MessageModel;
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,7 +30,7 @@ public class CommitLogAppendHandler {
     public void prepareLoadingToMMap(String topicName) throws IOException {
         CommitLogFileModel commitLogFileModel = new CommitLogFileModel();
         commitLogFileModel.loadingFileInMMap(topicName, messageStoreConfig.getCommitLogPath(),
-                0, StoreConstant.COMMIT_LOG_DEFAULT_SIZE);
+                0, messageStoreConfig.getCommitLogFileSize());
         COMMIT_LOG_FILE_MODE_MANAGER.put(commitLogFileModel);
     }
 

@@ -1,7 +1,6 @@
 package com.aoaojiao.catmq.store.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Method;
@@ -30,7 +29,7 @@ public class MMapUtil {
                                                           int mappedSize) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
-            throw new FileNotFoundException("file path [ " + filePath + " ] is valid");
+            file.createNewFile();
         }
         FileChannel fileChannel = new RandomAccessFile(file, "rw").getChannel();
         MappedByteBuffer mappedByteBuffer = fileChannel
