@@ -30,7 +30,7 @@ public class CommitLogAppendHandler {
      */
     public void prepareLoadingToMMap(String topicName) throws IOException {
         CommitLogFileModel commitLogFileModel = new CommitLogFileModel();
-        commitLogFileModel.loadingFileInMMap(topicName, messageStoreConfig.getStorePathRootDir(),
+        commitLogFileModel.loadingFileInMMap(topicName, messageStoreConfig.getCommitLogPath(),
                 0, StoreConstant.COMMIT_LOG_DEFAULT_SIZE);
         COMMIT_LOG_FILE_MODE_MANAGER.put(commitLogFileModel);
     }
@@ -41,7 +41,7 @@ public class CommitLogAppendHandler {
      * @param topicName 主题名
      * @param content   内容
      */
-    public void appendMessage(String topicName, byte[] content) throws ClassNotFoundException {
+    public void appendMessage(String topicName, byte[] content) throws ClassNotFoundException, IOException {
         CommitLogFileModel commitLogFileModel = getCommitLogFileModel(topicName);
         MessageModel messageModel = MessageModel.builder()
                 .content(content)
