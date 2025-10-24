@@ -34,6 +34,5 @@ build/
 ### Mac OS ###
 .DS_Store
 
-
-### catmq store file ###
-catmq/store/**
+### catmq file ###
+/catmq/
