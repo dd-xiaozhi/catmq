@@ -1,5 +1,7 @@
 package com.aoaojiao.catmq.common.cache;
 
+import lombok.AllArgsConstructor;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,12 +13,26 @@ import java.util.concurrent.Executors;
 public class CommonThreadPool {
 
     /**
-     * 负责刷新 catmq 的 topicInfo 文件刷盘工作
+     * 负责刷新 catmq-topic.json 文件刷盘工作
      */
-    public static final ExecutorService refreshCatmqTopicInfoExecutor = Executors.newFixedThreadPool(1,
-            r -> {
-                Thread thread = new Thread(r);
-                thread.setName("refresh-catmq-topic-info-thread");
-                return thread;
-            });
+    public static final ExecutorService refreshCatmqTopicFileExecutor = Executors.newFixedThreadPool(1,
+            r -> new Worker("refresh-catmq-topic-file-thread", r));
+    
+    /**
+     * 负责刷新 consume-queue-offset.json 文件刷盘工作
+     */
+    public static final ExecutorService refreshConsumeQueueOffsetFileExecutor = Executors.newFixedThreadPool(1,
+            r -> new Worker("refresh-consume-queue-offset-file-thread", r));
+    
+    @AllArgsConstructor
+    public static class Worker extends Thread {
+        
+        public String threadName;
+        public Runnable runnable;
+
+        @Override
+        public void run() {
+            runnable.run();
+        }
+    }
 }

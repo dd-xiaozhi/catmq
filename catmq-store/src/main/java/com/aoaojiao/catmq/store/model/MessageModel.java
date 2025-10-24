@@ -29,7 +29,7 @@ public class MessageModel {
      * @return
      */
     public byte[] convertToBytes() {
-
+        
         return null;
     }
 }

@@ -1,6 +1,7 @@
 package com.aoaojiao.catmq.broker;
 
-import com.aoaojiao.catmq.broker.loader.TopicConfigLoader;
+import com.aoaojiao.catmq.broker.loader.CatmqTopicLoader;
+import com.aoaojiao.catmq.broker.loader.ConsumeQueueOffsetLoader;
 import com.aoaojiao.catmq.common.cache.CommonCache;
 import com.aoaojiao.catmq.common.model.CatmqTopicModel;
 import com.aoaojiao.catmq.store.config.MessageStoreConfig;
@@ -8,6 +9,7 @@ import com.aoaojiao.catmq.store.core.CommitLogAppendHandler;
 import lombok.Data;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author DD
@@ -17,18 +19,23 @@ import java.io.IOException;
 @Data
 public class BrokerStartup {
 
-    public ConfigContext configContext;
-    private TopicConfigLoader topicConfigLoader;
+    private ConfigContext configContext;
+    private CatmqTopicLoader catmqTopicLoader;
+    private ConsumeQueueOffsetLoader consumeQueueOffsetLoader;
     private CommitLogAppendHandler commitLogAppendHandler;
 
     public void start() {
-        // 加载配置文件
-        ConfigContext configContext = loadConfigFile();
-        // 预加载 commitLog
-        prepareLoadFile(configContext.getMessageStoreConfig());
+        this.configContext = createConfigContext();
+        initProperties();
+        startTaskThread();
+        dataPrepareLoad();
     }
 
-    private ConfigContext loadConfigFile() {
+    /**
+     * 加载配置文件并创建 ConfigContext
+     * @return ConfigContext
+     */
+    private ConfigContext createConfigContext() {
         ConfigContext configContext = new ConfigContext();
         MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
         configContext.setMessageStoreConfig(messageStoreConfig);
@@ -37,16 +44,36 @@ public class BrokerStartup {
         return configContext;
     }
 
-    private void prepareLoadFile(MessageStoreConfig messageStoreConfig) {
-        this.commitLogAppendHandler = new CommitLogAppendHandler(messageStoreConfig);
-        // 加载 queue 信息 (需要提前创建 topic)
-        loadTopicConfig(messageStoreConfig);
-        // 预加载 commitLog 文件到内存中
+    /**
+     * 数据预加载
+     */
+    private void dataPrepareLoad() {
+        this.commitLogAppendHandler = new CommitLogAppendHandler(this.configContext.getMessageStoreConfig());
         prepareCommitLogFileInMMap();
     }
 
+    /**
+     * 初始化配置信息
+     */
+    private void initProperties() {
+        this.catmqTopicLoader = new CatmqTopicLoader(this.configContext.getMessageStoreConfig());
+        this.catmqTopicLoader.loadTopicInfo();
+
+        this.consumeQueueOffsetLoader = new ConsumeQueueOffsetLoader(this.configContext.getMessageStoreConfig());
+        this.consumeQueueOffsetLoader.loadConsumeQueueOffsetInfo();
+    }
+
+    /**
+     * 启动任务线程
+     */
+    private void startTaskThread() {
+        this.catmqTopicLoader.startFlushTopicInfoThread();
+        this.consumeQueueOffsetLoader.startConsumeQueueOffsetInfoThread();
+    }
+
     private void prepareCommitLogFileInMMap() {
-        for (CatmqTopicModel catmqTopicModel : CommonCache.CATMQ_TOPIC_MODEL_CACHE) {
+        List<CatmqTopicModel> catmqTopicModelList = CommonCache.getCatmqTopicModelList();
+        for (CatmqTopicModel catmqTopicModel : catmqTopicModelList) {
             try {
                 this.commitLogAppendHandler.prepareLoadingToMMap(catmqTopicModel.getTopic());
             } catch (IOException e) {
@@ -55,15 +82,8 @@ public class BrokerStartup {
         }
     }
 
-    private void loadTopicConfig(MessageStoreConfig messageStoreConfig) {
-        this.topicConfigLoader = new TopicConfigLoader(messageStoreConfig);
-        this.topicConfigLoader.loadTopicInfo();
-        topicConfigLoader.startFlushTopicInfoThread();
-    }
-
     public static void main(String[] args) {
         new BrokerStartup().start();
-        
     }
 
 }

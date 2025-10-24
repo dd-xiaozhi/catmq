@@ -1,7 +1,7 @@
 package com.aoaojiao.catmq.test;
 
 
-import com.aoaojiao.catmq.broker.loader.TopicConfigLoader;
+import com.aoaojiao.catmq.broker.loader.CatmqTopicLoader;
 import com.aoaojiao.catmq.store.config.MessageStoreConfig;
 import com.aoaojiao.catmq.store.core.CommitLogAppendHandler;
 import com.aoaojiao.catmq.store.model.MessageModel;
@@ -21,8 +21,8 @@ public class CommitLogAppendHandlerTest {
     public void init() throws IOException {
         this.messageStoreConfig = new MessageStoreConfig();
         messageStoreConfig.setStorePathRootDir("D:\\Work\\project\\catmq\\catmq\\store");
-        TopicConfigLoader topicConfigLoader = new TopicConfigLoader(messageStoreConfig);
-        topicConfigLoader.loadTopicInfo();
+        CatmqTopicLoader catmqTopicLoader = new CatmqTopicLoader(messageStoreConfig);
+        catmqTopicLoader.loadTopicInfo();
     }
 
     @Test
