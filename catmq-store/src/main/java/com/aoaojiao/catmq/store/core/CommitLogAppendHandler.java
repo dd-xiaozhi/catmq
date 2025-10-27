@@ -30,7 +30,7 @@ public class CommitLogAppendHandler {
     public void prepareLoadingToMMap(String topicName) throws IOException {
         CommitLogFileModel commitLogFileModel = new CommitLogFileModel();
         commitLogFileModel.loadingFileInMMap(topicName, messageStoreConfig.getCommitLogDirPath(),
-                0, messageStoreConfig.getCommitLogFileSize());
+                0, messageStoreConfig.getMessageCommitLogFileSize());
         COMMIT_LOG_FILE_MODE_MANAGER.put(commitLogFileModel);
     }
 
