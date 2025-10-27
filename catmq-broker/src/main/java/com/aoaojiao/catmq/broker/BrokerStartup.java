@@ -25,17 +25,16 @@ public class BrokerStartup {
     private CommitLogAppendHandler commitLogAppendHandler;
 
     public void start() {
-        this.configContext = createConfigContext();
+        initConfigContext();
         initProperties();
         startTaskThread();
         dataPrepareLoad();
     }
 
     /**
-     * 加载配置文件并创建 ConfigContext
-     * @return ConfigContext
+     * 初始化加载配置文件并创建 ConfigContext
      */
-    private ConfigContext createConfigContext() {
+    private ConfigContext initConfigContext() {
         ConfigContext configContext = new ConfigContext();
         MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
         configContext.setMessageStoreConfig(messageStoreConfig);
@@ -48,8 +47,30 @@ public class BrokerStartup {
      * 数据预加载
      */
     private void dataPrepareLoad() {
+        loadCommitLogFile();
+        loadQueueCommitLogFile();
+    }
+
+    /**
+     * 预加载 commitLog 文件到 内存中
+     */
+    private void loadCommitLogFile() {
         this.commitLogAppendHandler = new CommitLogAppendHandler(this.configContext.getMessageStoreConfig());
-        prepareCommitLogFileInMMap();
+        List<CatmqTopicModel> catmqTopicModelList = CommonCache.getCatmqTopicModelList();
+        for (CatmqTopicModel catmqTopicModel : catmqTopicModelList) {
+            try {
+                this.commitLogAppendHandler.prepareLoadingToMMap(catmqTopicModel.getTopic());
+            } catch (IOException e) {
+                throw new RuntimeException("prepare load topic commitLog file error", e);
+            }
+        }
+    }
+
+    /**
+     * 加载队列索引
+     */
+    private void loadQueueCommitLogFile() {
+
     }
 
     /**
@@ -72,14 +93,7 @@ public class BrokerStartup {
     }
 
     private void prepareCommitLogFileInMMap() {
-        List<CatmqTopicModel> catmqTopicModelList = CommonCache.getCatmqTopicModelList();
-        for (CatmqTopicModel catmqTopicModel : catmqTopicModelList) {
-            try {
-                this.commitLogAppendHandler.prepareLoadingToMMap(catmqTopicModel.getTopic());
-            } catch (IOException e) {
-                throw new RuntimeException("prepare load topic commitLog file error", e);
-            }
-        }
+
     }
 
     public static void main(String[] args) {
