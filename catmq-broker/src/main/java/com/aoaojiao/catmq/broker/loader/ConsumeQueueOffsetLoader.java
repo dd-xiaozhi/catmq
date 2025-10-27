@@ -1,6 +1,7 @@
 package com.aoaojiao.catmq.broker.loader;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.aoaojiao.catmq.broker.utils.FileContentUtil;
 import com.aoaojiao.catmq.common.cache.CommonCache;
 import com.aoaojiao.catmq.common.cache.CommonThreadPool;
@@ -25,7 +26,8 @@ public class ConsumeQueueOffsetLoader {
     public void loadConsumeQueueOffsetInfo() {
         try {
             String jsonStr = FileContentUtil.readFileTpString(messageStoreConfig.getConsumeQueueOffsetFilePath());
-            CommonCache.setConsumeQueueOffsetModelCache(JSON.parseObject(jsonStr, ConsumeQueueOffsetModel.class));
+            ConsumeQueueOffsetModel consumeQueueOffsetModel = JSON.parseObject(jsonStr, ConsumeQueueOffsetModel.class);
+            CommonCache.setConsumeQueueOffsetModelCache(consumeQueueOffsetModel);
         } catch (Exception e) {
             throw new RuntimeException("load catmq consume queue offset info error", e);
         }
@@ -43,7 +45,8 @@ public class ConsumeQueueOffsetLoader {
                 System.out.println("refresh catmq consume queue offset info");
                 ConsumeQueueOffsetModel catmqTopicModelCache = CommonCache.getConsumeQueueOffsetModelCache();
                 // 重新写回到 topicInfo 文件中
-                String jsonStr = JSON.toJSONString(catmqTopicModelCache);
+                // TODO 方便查看，使用美化输出，后面移除
+                String jsonStr = JSON.toJSONString(catmqTopicModelCache, JSONWriter.Feature.PrettyFormat);
                 try {
                     FileContentUtil.writeStringToFile(messageStoreConfig.getConsumeQueueOffsetFilePath(), jsonStr);
                 } catch (IOException e) {

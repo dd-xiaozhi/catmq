@@ -1,6 +1,7 @@
 package com.aoaojiao.catmq.broker.loader;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONWriter;
 import com.aoaojiao.catmq.broker.utils.FileContentUtil;
 import com.aoaojiao.catmq.common.cache.CommonCache;
 import com.aoaojiao.catmq.common.cache.CommonThreadPool;
@@ -44,7 +45,7 @@ public class CatmqTopicLoader {
                 System.out.println("refresh catmq topic info");
                 List<CatmqTopicModel> catmqTopicModelCache = CommonCache.getCatmqTopicModelList();
                 // 重新写回到 topicInfo 文件中
-                String jsonStr = JSON.toJSONString(catmqTopicModelCache);
+                String jsonStr = JSON.toJSONString(catmqTopicModelCache, JSONWriter.Feature.PrettyFormat);
                 try {
                     FileContentUtil.writeStringToFile(messageStoreConfig.getTopicInfoFilePath(), jsonStr);
                 } catch (IOException e) {
