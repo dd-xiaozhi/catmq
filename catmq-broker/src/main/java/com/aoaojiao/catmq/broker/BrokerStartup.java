@@ -26,21 +26,23 @@ public class BrokerStartup {
 
     public void start() {
         initConfigContext();
+
         initProperties();
+
         startTaskThread();
+
         dataPrepareLoad();
     }
 
     /**
      * 初始化加载配置文件并创建 ConfigContext
      */
-    private ConfigContext initConfigContext() {
+    private void initConfigContext() {
         ConfigContext configContext = new ConfigContext();
         MessageStoreConfig messageStoreConfig = new MessageStoreConfig();
         configContext.setMessageStoreConfig(messageStoreConfig);
 
         this.configContext = configContext;
-        return configContext;
     }
 
     /**

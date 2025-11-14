@@ -26,7 +26,7 @@ public class MessageModel {
     /**
      * 读取成字节输错
      *
-     * @return
+     * @return 字节数组
      */
     public byte[] convertToBytes() {
         

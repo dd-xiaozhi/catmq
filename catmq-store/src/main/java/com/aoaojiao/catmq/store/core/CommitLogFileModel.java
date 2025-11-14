@@ -7,6 +7,7 @@ import com.aoaojiao.catmq.store.lock.PutMessageLock;
 import com.aoaojiao.catmq.store.lock.PutMessageReentrantLock;
 import com.aoaojiao.catmq.store.model.MessageModel;
 import com.aoaojiao.catmq.store.util.MMapUtil;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Map;
  */
 public class CommitLogFileModel {
 
+    @Getter
     private String topicName;
     private String storePath;
     private MappedByteBuffer mappedByteBuffer;
@@ -28,7 +30,7 @@ public class CommitLogFileModel {
     /**
      * 加载指定主题名的 commitLog 文件
      *
-     * @param topicName
+     * @param topicName 主题名
      */
     public void loadingFileInMMap(String topicName,
                                   String storePath,
@@ -36,7 +38,7 @@ public class CommitLogFileModel {
                                   int maxOffset) throws IOException {
         this.topicName = topicName;
         this.storePath = storePath;
-        this.mappedByteBuffer = MMapUtil.createMappedByteBuffer(getFilePath(), startOffset, maxOffset);
+        this.mappedByteBuffer = MMapUtil.createRWMappedByteBuffer(getFilePath(), startOffset, maxOffset);
     }
 
     /**
@@ -99,7 +101,7 @@ public class CommitLogFileModel {
             commitLogModel.setFilename(newCommitLogFilename);
             commitLogModel.getOffset().set(messageSize);
             try {
-                this.mappedByteBuffer = MMapUtil.createMappedByteBuffer(getFilePath(), 0, commitLogModel.getOffsetLimit());
+                this.mappedByteBuffer = MMapUtil.createRWMappedByteBuffer(getFilePath(), 0, commitLogModel.getOffsetLimit());
             } catch (IOException e) {
                 throw new RuntimeException("create new commitLog error, topic: " + this.topicName);
             }
@@ -110,13 +112,13 @@ public class CommitLogFileModel {
      * 获取下一个 commitLog 文件的文件名
      *
      * @param oldCommitLogFilename 旧 commitLog 文件名
-     * @return
+     * @return 新 commitLog 文件名
      */
     private String getCommitLogNextFilename(String oldCommitLogFilename) {
         if (oldCommitLogFilename.length() != 8) {
             throw new IllegalArgumentException("fileName must has 8 chars");
         }
-        String newIntFileName = String.valueOf(Integer.valueOf(oldCommitLogFilename) + 1);
+        String newIntFileName = String.valueOf(Integer.parseInt(oldCommitLogFilename) + 1);
         StringBuilder newCommitLogFileName = new StringBuilder();
         // 前面补 0 到 8 位
         for (int i = 0; i < 8 - newIntFileName.length(); i++) {
@@ -130,7 +132,4 @@ public class CommitLogFileModel {
         return MMapUtil.readContent(this.mappedByteBuffer, offset, offsetSize);
     }
 
-    public String getTopicName() {
-        return this.topicName;
-    }
 }
