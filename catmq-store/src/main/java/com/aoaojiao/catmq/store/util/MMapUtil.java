@@ -15,6 +15,23 @@ import java.security.PrivilegedAction;
  */
 public class MMapUtil {
 
+    public static MappedByteBuffer createRWMappedByteBuffer(String filePath,
+                                                            int startOffset,
+                                                            int mappedSize) throws IOException {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            boolean isNewFile = file.createNewFile();
+            if (!isNewFile) {
+                throw new IOException("create file error");
+            }
+        }
+
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
+             FileChannel fileChannel = raf.getChannel()) {
+            return fileChannel.map(FileChannel.MapMode.READ_WRITE, startOffset, mappedSize);
+        }
+    }
+
     /**
      * 指定 offset 创建文件映射
      *
@@ -22,19 +39,23 @@ public class MMapUtil {
      * @param startOffset 映射开始位置
      * @param mappedSize  映射大小
      * @return MappedByteBuffer
-     * @throws IOException
      */
-    public static MappedByteBuffer createMappedByteBuffer(String filePath,
-                                                          int startOffset,
-                                                          int mappedSize) throws IOException {
+    public static MappedByteBuffer createRWMappedByteBuffer(String filePath,
+                                                            int startOffset,
+                                                            int mappedSize,
+                                                            String mode) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
-            file.createNewFile();
+            boolean isNewFile = file.createNewFile();
+            if (!isNewFile) {
+                throw new IOException("create file error");
+            }
         }
-        FileChannel fileChannel = new RandomAccessFile(file, "rw").getChannel();
-        MappedByteBuffer mappedByteBuffer = fileChannel
-                .map(FileChannel.MapMode.READ_WRITE, startOffset, mappedSize);
-        return mappedByteBuffer;
+
+        try (RandomAccessFile raf = new RandomAccessFile(file, mode);
+             FileChannel fileChannel = raf.getChannel()) {
+            return fileChannel.map(FileChannel.MapMode.READ_WRITE, startOffset, mappedSize);
+        }
     }
 
 
@@ -84,7 +105,7 @@ public class MMapUtil {
      * 注意：MappedByteBuffer::clear() 不会释放内存，而是清除缓冲区，内存还是占用的
      * 因为 MMap 申请的是堆外内存，不归JVM虚拟机管理，所以不会被 GC，需要我们手动释放内存
      *
-     * @param mappedByteBuffer
+     * @param mappedByteBuffer MappedByteBuffer
      */
     public static void clean(MappedByteBuffer mappedByteBuffer) {
         if (mappedByteBuffer == null || !mappedByteBuffer.isDirect() || mappedByteBuffer.capacity() == 0)
@@ -117,8 +138,8 @@ public class MMapUtil {
         String methodName = "viewedBuffer";
         Method[] methods = buffer.getClass().getMethods();
         // 兼容 jdk 版本
-        for (int i = 0; i < methods.length; i++) {
-            if (methods[i].getName().equals("attachment")) {
+        for (Method method : methods) {
+            if (method.getName().equals("attachment")) {
                 methodName = "attachment";
                 break;
             }
@@ -132,8 +153,9 @@ public class MMapUtil {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        MappedByteBuffer mappedByteBuffer = createMappedByteBuffer("D:\\Work\\Java\\study\\study\\netty-study\\src\\main\\java\\com\\xiaozhi\\study\\utils\\test",
-                0, 1 * 1024 * 1024);
+        MappedByteBuffer mappedByteBuffer = createRWMappedByteBuffer("D:\\Work\\Java\\study\\study\\netty-study\\src" +
+                        "\\main\\java\\com\\xiaozhi\\study\\utils\\test",
+                0, 1024 * 1024);
         byte[] bytes = "i am xiaozhi".getBytes();
         writeContent(mappedByteBuffer, bytes, true);
         System.out.println(new String(readContent(mappedByteBuffer, 0, bytes.length)));

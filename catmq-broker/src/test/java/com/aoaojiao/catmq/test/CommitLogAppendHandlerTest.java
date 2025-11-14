@@ -18,9 +18,8 @@ public class CommitLogAppendHandlerTest {
     private MessageStoreConfig messageStoreConfig;
 
     @Before
-    public void init() throws IOException {
+    public void init() {
         this.messageStoreConfig = new MessageStoreConfig();
-        messageStoreConfig.setStorePathRootDir("D:\\Work\\project\\catmq\\catmq\\store");
         CatmqTopicLoader catmqTopicLoader = new CatmqTopicLoader(messageStoreConfig);
         catmqTopicLoader.loadTopicInfo();
     }
