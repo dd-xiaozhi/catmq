@@ -21,8 +21,8 @@ public class BrokerStartup {
 
     private ConfigContext configContext;
     private CatmqTopicLoader catmqTopicLoader;
-    private ConsumeQueueOffsetLoader consumeQueueOffsetLoader;
     private CommitLogAppendHandler commitLogAppendHandler;
+    private ConsumeQueueOffsetLoader consumeQueueOffsetLoader;
 
     public void start() {
         initConfigContext();
@@ -49,14 +49,14 @@ public class BrokerStartup {
      * 数据预加载
      */
     private void dataPrepareLoad() {
-        loadCommitLogFile();
-        loadQueueCommitLogFile();
+        loadCommitLog();
+        loadConsumerQueue();
     }
 
     /**
      * 预加载 commitLog 文件到 内存中
      */
-    private void loadCommitLogFile() {
+    private void loadCommitLog() {
         this.commitLogAppendHandler = new CommitLogAppendHandler(this.configContext.getMessageStoreConfig());
         List<CatmqTopicModel> catmqTopicModelList = CommonCache.getCatmqTopicModelList();
         for (CatmqTopicModel catmqTopicModel : catmqTopicModelList) {
@@ -69,9 +69,9 @@ public class BrokerStartup {
     }
 
     /**
-     * 加载队列索引
+     * 加载消费队列
      */
-    private void loadQueueCommitLogFile() {
+    private void loadConsumerQueue() {
 
     }
 
