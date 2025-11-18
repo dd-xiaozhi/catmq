@@ -4,11 +4,12 @@ package com.aoaojiao.catmq.test;
 import com.aoaojiao.catmq.broker.loader.CatmqTopicLoader;
 import com.aoaojiao.catmq.store.config.MessageStoreConfig;
 import com.aoaojiao.catmq.store.core.CommitLogAppendHandler;
-import com.aoaojiao.catmq.store.model.MessageModel;
+import com.aoaojiao.catmq.store.model.Message;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author DD
@@ -25,13 +26,14 @@ public class CommitLogAppendHandlerTest {
     }
 
     @Test
-    public void test() throws IOException, ClassNotFoundException {
+    public void test() throws IOException, ClassNotFoundException, InterruptedException {
         CommitLogAppendHandler commitLogAppendHandler = new CommitLogAppendHandler(messageStoreConfig);
         String topic = "order_pay_topic";
         commitLogAppendHandler.prepareLoadingToMMap(topic);
         byte[] content = "i am xiaozhi".getBytes();
         commitLogAppendHandler.appendMessage(topic, content);
-        MessageModel messageModel = commitLogAppendHandler.readMessage(topic, 0, content.length);
-        System.out.println("读取消息: " + new String(messageModel.getContent()));
+        Message message = commitLogAppendHandler.readMessage(topic, 0, content.length);
+        System.out.println("读取消息: " + new String(message.getContent()));
+        TimeUnit.SECONDS.sleep(6);
     }
 }

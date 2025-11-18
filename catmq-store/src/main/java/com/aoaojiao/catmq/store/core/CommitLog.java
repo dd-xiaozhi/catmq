@@ -5,7 +5,7 @@ import com.aoaojiao.catmq.common.model.CatmqTopicModel;
 import com.aoaojiao.catmq.common.model.CommitLogModel;
 import com.aoaojiao.catmq.store.lock.PutMessageLock;
 import com.aoaojiao.catmq.store.lock.PutMessageReentrantLock;
-import com.aoaojiao.catmq.store.model.MessageModel;
+import com.aoaojiao.catmq.store.model.Message;
 import com.aoaojiao.catmq.store.util.MMapUtil;
 import lombok.Getter;
 
@@ -19,7 +19,7 @@ import java.util.Map;
  *
  * @author DD
  */
-public class CommitLogFileModel {
+public class CommitLog {
 
     @Getter
     private String topicName;
@@ -64,9 +64,9 @@ public class CommitLogFileModel {
      * 判断 commitLog 文件是否已满，如果已满则需要创建新的 commitLog 文件
      * TODO 目前先只写入消息体
      *
-     * @param messageModel 消息模型，commitLog 最小数据单元
+     * @param message 消息模型，commitLog 最小数据单元
      */
-    public void writeContent(MessageModel messageModel) {
+    public void writeContent(Message message) {
         Map<String, CatmqTopicModel> catmqTopicModelMap = CommonCache.getCatmqTopicModelMap();
         CatmqTopicModel catmqTopicModel = catmqTopicModelMap.get(this.topicName);
         if (catmqTopicModel == null) {
@@ -79,20 +79,20 @@ public class CommitLogFileModel {
         }
 
         putMessageLock.lock();
-        checkIsCreateNewCommitLogFile(messageModel, commitLogModel);
-        MMapUtil.writeContent(this.mappedByteBuffer, messageModel.getContent());
+        checkIsCreateNewCommitLogFile(message, commitLogModel);
+        MMapUtil.writeContent(this.mappedByteBuffer, message.getContent());
         putMessageLock.unlock();
     }
 
     /**
      * 检查旧文件是否已经满，是否需要创建新的文件来存储
      *
-     * @param messageModel   messageModel
+     * @param message   message
      * @param commitLogModel commitLogModel
      */
-    private void checkIsCreateNewCommitLogFile(MessageModel messageModel,
+    private void checkIsCreateNewCommitLogFile(Message message,
                                                CommitLogModel commitLogModel) {
-        int messageSize = messageModel.getContent().length;
+        int messageSize = message.getContent().length;
         commitLogModel.addOffset(messageSize);
         int offsetDiff = commitLogModel.offsetDiff();
         if (offsetDiff <= 0) {

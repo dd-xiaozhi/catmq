@@ -11,17 +11,10 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class MessageModel {
+public class Message {
 
-    /**
-     * 消息内容
-     */
-    private byte[] content;
-
-    /**
-     * 消息大小，单位：字节
-     */
     private int size;
+    private byte[] content;
 
     /**
      * 读取成字节输错

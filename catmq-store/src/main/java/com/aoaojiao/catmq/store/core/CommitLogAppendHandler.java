@@ -1,7 +1,7 @@
 package com.aoaojiao.catmq.store.core;
 
 import com.aoaojiao.catmq.store.config.MessageStoreConfig;
-import com.aoaojiao.catmq.store.model.MessageModel;
+import com.aoaojiao.catmq.store.model.Message;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class CommitLogAppendHandler {
 
     private final MessageStoreConfig messageStoreConfig;
 
-    private final static CommitLogFileModeManager COMMIT_LOG_FILE_MODE_MANAGER = new CommitLogFileModeManager();
+    private final static CommitLogManager COMMIT_LOG_FILE_MODE_MANAGER = new CommitLogManager();
     
     public CommitLogAppendHandler(MessageStoreConfig messageStoreConfig) {
         this.messageStoreConfig = messageStoreConfig;
@@ -28,10 +28,10 @@ public class CommitLogAppendHandler {
      * @param topicName 主题名
      */
     public void prepareLoadingToMMap(String topicName) throws IOException {
-        CommitLogFileModel commitLogFileModel = new CommitLogFileModel();
-        commitLogFileModel.loadingFileInMMap(topicName, messageStoreConfig.getCommitLogDirPath(),
+        CommitLog commitLog = new CommitLog();
+        commitLog.loadingFileInMMap(topicName, messageStoreConfig.getCommitLogDirPath(),
                 0, messageStoreConfig.getMessageCommitLogFileSize());
-        COMMIT_LOG_FILE_MODE_MANAGER.put(commitLogFileModel);
+        COMMIT_LOG_FILE_MODE_MANAGER.put(commitLog);
     }
 
     /**
@@ -41,12 +41,12 @@ public class CommitLogAppendHandler {
      * @param content   内容
      */
     public void appendMessage(String topicName, byte[] content) throws ClassNotFoundException, IOException {
-        CommitLogFileModel commitLogFileModel = getCommitLogFileModel(topicName);
-        MessageModel messageModel = MessageModel.builder()
+        CommitLog commitLog = getCommitLogFileModel(topicName);
+        Message message = Message.builder()
                 .content(content)
                 .size(content.length)
                 .build();
-        commitLogFileModel.writeContent(messageModel);
+        commitLog.writeContent(message);
     }
 
     /**
@@ -57,23 +57,23 @@ public class CommitLogAppendHandler {
      * @param offsetSize  偏移大小
      * @return 消息
      */
-    public MessageModel readMessage(String topicName, int startOffset, int offsetSize) throws ClassNotFoundException {
-        CommitLogFileModel commitLogFileModel = getCommitLogFileModel(topicName);
-        byte[] content = commitLogFileModel.readContent(startOffset, offsetSize);
+    public Message readMessage(String topicName, int startOffset, int offsetSize) throws ClassNotFoundException {
+        CommitLog commitLog = getCommitLogFileModel(topicName);
+        byte[] content = commitLog.readContent(startOffset, offsetSize);
         System.out.println(new String(content));
-        return MessageModel.builder().content(content).build();
+        return Message.builder().content(content).build();
     }
 
-    private CommitLogFileModel getCommitLogFileModel(String topicName) throws ClassNotFoundException {
+    private CommitLog getCommitLogFileModel(String topicName) throws ClassNotFoundException {
         if (StringUtils.isBlank(topicName)) {
             throw new IllegalStateException("topic name is blank");
         }
 
-        CommitLogFileModel commitLogFileModel = COMMIT_LOG_FILE_MODE_MANAGER.get(topicName);
-        if (commitLogFileModel == null) {
+        CommitLog commitLog = COMMIT_LOG_FILE_MODE_MANAGER.get(topicName);
+        if (commitLog == null) {
             throw new ClassNotFoundException(String.format("topic: %s is not prepare", topicName));
         }
-        return commitLogFileModel;
+        return commitLog;
     }
 
 }
