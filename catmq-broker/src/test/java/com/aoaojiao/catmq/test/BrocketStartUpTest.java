@@ -6,6 +6,7 @@ import com.aoaojiao.catmq.store.config.MessageStoreConfig;
 import com.aoaojiao.catmq.store.core.CommitLogAppendHandler;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +30,7 @@ public class BrocketStartUpTest {
     }
 
     @Test
+    @Ignore("需要真实 broker 环境，运行集成测试时启用")
     public void brokerStartupStartTest() throws InterruptedException, IOException, ClassNotFoundException {
         brokerStartup.start();
         CommitLogAppendHandler commitLogAppendHandler = new CommitLogAppendHandler(this.configContext.getMessageStoreConfig());

@@ -251,8 +251,12 @@ public class TimeWheel {
             String taskKey = entry.getKey();
             Bucket.TaskEntry taskEntry = entry.getValue();
 
-            // 检查任务是否过期
-            if (taskEntry.expireTime <= now) {
+            // 计算剩余延迟时间
+            long remainingDelay = taskEntry.expireTime - now;
+
+            // 如果任务已过期或剩余延迟小于一个tick，立即触发
+            // 这样可以确保延迟时间较短的任务能及时被处理
+            if (remainingDelay <= 0 || remainingDelay < tickMs) {
                 // 再次检查缓存，确认任务仍然有效
                 Long cachedExpire = taskCache.get(taskKey);
                 if (cachedExpire != null && cachedExpire.equals(taskEntry.expireTime)) {
@@ -270,7 +274,7 @@ public class TimeWheel {
                 }
             } else {
                 // 任务未过期，重新调度（可能时间轮刚推进）
-                addTask(taskKey, taskEntry.expireTime - now, taskEntry.data);
+                addTask(taskKey, remainingDelay, taskEntry.data);
             }
         }
     }

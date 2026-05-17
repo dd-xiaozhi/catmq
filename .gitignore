@@ -36,3 +36,5 @@ build/
 
 ### catmq file ###
 /catmq/
+/catmq/store/consumeQueue/**
+/catmq/store/commitLog/**

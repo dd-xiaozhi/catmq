@@ -1,6 +1,7 @@
 package com.aoaojiao.catmq.cluster.loadbalance;
 
 import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,11 +25,14 @@ public class LoadBalancerTest {
     public void setUp() {
         brokers = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
-            BrokerInfo broker = BrokerInfo.builder()
-                    .brokerName("broker_" + i)
-                    .address("127.0.0." + i + ":9876")
-                    .weight(100)
-                    .build();
+            // 使用构造函数而非 builder
+            BrokerInfo broker = new BrokerInfo(
+                    "broker_" + i,
+                    "broker_" + i,
+                    "127.0.0." + (i + 1),
+                    9876
+            );
+            broker.setWeight(100);
             brokers.add(broker);
         }
     }
@@ -142,13 +146,80 @@ public class LoadBalancerTest {
 
     @Test
     public void testLoadBalancerFactory() {
-        LoadBalancer roundRobin = LoadBalancerFactory.getLoadBalancer(LoadBalancer.Strategy.ROUND_ROBIN);
+        LoadBalancer roundRobin = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN);
         assertTrue("应该是RoundRobin实例", roundRobin instanceof RoundRobinLoadBalancer);
 
-        LoadBalancer random = LoadBalancerFactory.getLoadBalancer(LoadBalancer.Strategy.RANDOM);
+        LoadBalancer random = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.RANDOM);
         assertTrue("应该是Random实例", random instanceof RandomLoadBalancer);
 
-        LoadBalancer consistentHash = LoadBalancerFactory.getLoadBalancer(LoadBalancer.Strategy.CONSISTENT_HASH);
+        LoadBalancer consistentHash = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.CONSISTENT_HASH, 100);
         assertTrue("应该是ConsistentHash实例", consistentHash instanceof ConsistentHashLoadBalancer);
+    }
+
+    @Test
+    public void testLoadBalancerFactorySelect() {
+        // 测试工厂的 select 方法
+        BrokerInfo selected1 = LoadBalancerFactory.select(
+                brokers,
+                ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN,
+                "test_key"
+        );
+        assertNotNull("应该选择一个broker", selected1);
+
+        BrokerInfo selected2 = LoadBalancerFactory.select(
+                brokers,
+                ClusterConfig.LoadBalanceStrategy.RANDOM,
+                "test_key"
+        );
+        assertNotNull("应该选择一个broker", selected2);
+    }
+
+    @Test
+    public void testLoadBalancerGetName() {
+        LoadBalancer roundRobin = new RoundRobinLoadBalancer();
+        assertNotNull("名称不应该为空", roundRobin.getName());
+
+        LoadBalancer random = new RandomLoadBalancer();
+        assertNotNull("名称不应该为空", random.getName());
+
+        LoadBalancer consistentHash = new ConsistentHashLoadBalancer(100);
+        assertNotNull("名称不应该为空", consistentHash.getName());
+    }
+
+    @Test
+    public void testLoadBalancerReset() {
+        LoadBalancer lb = new RoundRobinLoadBalancer();
+        lb.reset(); // 不应该抛出异常
+        assertNotNull("重置后应该仍然可用", lb);
+    }
+
+    @Test
+    public void testLoadBalancerUpdateRoute() {
+        LoadBalancer lb = new RoundRobinLoadBalancer();
+        lb.updateRoute("broker_1", true); // 不应该抛出异常
+        assertNotNull("更新路由后应该仍然可用", lb);
+    }
+
+    @Test
+    public void testLoadBalancerFactoryClear() {
+        // 第一次创建
+        LoadBalancer lb1 = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN);
+        // 第二次获取
+        LoadBalancer lb2 = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN);
+        assertSame("应该是同一个实例", lb1, lb2);
+
+        // 清空缓存
+        LoadBalancerFactory.clear();
+
+        // 清空后创建新实例
+        LoadBalancer lb3 = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN);
+        assertNotSame("清空后应该创建新实例", lb1, lb3);
+    }
+
+    @Test
+    public void testLoadBalancerFactoryReset() {
+        LoadBalancer lb = LoadBalancerFactory.create(ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN);
+        LoadBalancerFactory.reset(ClusterConfig.LoadBalanceStrategy.ROUND_ROBIN);
+        // 重置后工厂缓存中的实例被重置，不应该抛出异常
     }
 }
