@@ -174,6 +174,7 @@ public class TopicService {
 
         return TopicResponse.builder()
                 .topic(model.getTopic())
+                .brokerId(model.getBrokerId())
                 .queueCount(model.getQueueModelList() != null ? model.getQueueModelList().size() : 0)
                 .createAt(model.getCreateAt())
                 .updateAt(model.getUpdateAt())

@@ -86,7 +86,7 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-
+            
             <!-- model -->
             <dependency>
                 <groupId>com.catmq</groupId>

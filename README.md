@@ -32,24 +32,7 @@ topic_info 文件结构设计：
 ```json
 [
   {
-    "commitLogModel": {
-      "filename": "00000000",	// 文件名
-      "offset": 0,	// 当前写入开始位置
-      "offsetLimit": 100	// commitLog 最大偏移量
-    },
-    "createAt": 1760992009,
-    "queueModelList": [
-      {
-        "currentOffset": 0,
-        "id": 0,
-        "maxOffset": 0,
-        "minOffset": 0
-      }
-    ],
-    "topic": "order_pay_topic",
-    "updateAt": 1760992009
-  },
-  {
+    "brokerId": "broker-001",
     "commitLogModel": {
       "filename": "00000000",
       "offset": 0,
@@ -64,7 +47,7 @@ topic_info 文件结构设计：
         "minOffset": 0
       }
     ],
-    "topic": "order_cancel_topic",
+    "topic": "order_pay_topic",
     "updateAt": 1760992009
   }
 ]
@@ -81,11 +64,13 @@ commitLog自动扩容：commitLog 文件满了自动创建新的 commitLog 文�
 - **MMap 内存映射**：基于 `FileChannel.map()` 实现零拷贝写入，MappedByteBuffer 直接映射文件 I/O，性能远高于传统 Stream 方式
 - **写入并发控制**：`CommitLog` 使用 `PutMessageReentrantLock` 锁保护追加操作，保证多线程写入时数据不交叉
 - **消费进度持久化**：`consume-queue-offset.json` 记录每个消费者的消费偏移量，重启后自动恢复，继续消费
-- **定时刷盘机制**：后台线程每 3 秒将内存中的 Topic 元信息、消费偏移量刷入磁盘，防止异常宕机时数据丢失
+- **定时刷盘机制**：后台线程定时将内存中的 Topic 元信息、消费偏移量刷入磁盘，防止异常宕机时数据丢失
 - **统一缓存层**：`CommonCache` 封装 Topic 列表、消费偏移量等热点数据，提供只读访问接口
 - **线程池管理**：`CommonThreadPool` 统一管理刷盘线程池，避免资源泄漏
+- **配置多数据源**：支持系统属性（-D）、环境变量、代码默认值三种配置方式，优先级依次递减
+- **加载器基类**：`BaseLoader<T>` 抽象基类统一管理文件加载和定时刷新，消除重复代码
 
-> 相关类：`CommitLog`、`MMapUtil`、`CommitLogAppendHandler`、`BrokerStartup`、`CatmqTopicLoader`、`ConsumeQueueOffsetLoader`、`CommonCache`、`CommonThreadPool`
+> 相关类：`CommitLog`、`MMapUtil`、`CommitLogAppendHandler`、`BrokerStartup`、`CatmqTopicLoader`、`ConsumeQueueOffsetLoader`、`BaseLoader`、`CommonCache`、`CommonThreadPool`、`ConfigUtil`
 
 
 
@@ -165,8 +150,9 @@ consumerQueue 根据索引定位拉取数据 ✅
   - **异步刷新（ASYNC）**：主节点写入后立即返回，从节点异步同步
   - **同步刷新（SYNC）**：主节点等待所有从节点写入成功才返回
   - **半同步刷新（SEMI_SYNC）**：主节点等待至少 N 个从节点确认
+- **集群 RPC 通信**：`ClusterRpcClient` 基于 Netty 实现连接池管理，支持同步/异步数据复制
 
-> 相关类：`SyncStrategy`、`SyncWriteStrategy`、`AsyncWriteStrategy`、`SemiSyncWriteStrategy`、`LoadBalancer`、`RoundRobinLoadBalancer`、`RandomLoadBalancer`、`ConsistentHashLoadBalancer`
+> 相关类：`SyncStrategy`、`SyncWriteStrategy`、`AsyncWriteStrategy`、`SemiSyncWriteStrategy`、`ClusterRpcClient`、`LoadBalancer`、`RoundRobinLoadBalancer`、`RandomLoadBalancer`、`ConsistentHashLoadBalancer`
 
 
 
@@ -217,7 +203,14 @@ consumerQueue 根据索引定位拉取数据 ✅
 - **GC 信息**：GC 次数、耗时
 - **文件描述符**：打开的 FD 数量
 
-> 相关类：`BrokerController`、`BrokerService`、`MetricsService`、`BrokerStatusResponse`
+### 告警通知系统
+
+- **多渠道通知**：支持邮件、钉钉、企业微信 WebHook 通知
+- **规则引擎**：支持 CPU、内存、磁盘、队列深度、延迟等指标告警
+- **持续时间检测**：支持告警触发前持续超过指定时间
+- **告警记录**：保留最近 1000 条告警记录，支持确认和处理
+
+> 相关类：`BrokerController`、`BrokerService`、`MetricsService`、`BrokerStatusResponse`、`AlertService`、`AlertNotifier`、`EmailAlertNotifier`、`DingTalkAlertNotifier`、`WeChatWorkAlertNotifier`
 
 
 

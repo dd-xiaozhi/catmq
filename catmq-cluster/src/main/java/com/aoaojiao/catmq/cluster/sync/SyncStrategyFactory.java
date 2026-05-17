@@ -79,6 +79,10 @@ public class SyncStrategyFactory {
             SyncStrategy strategy = entry.getValue();
             if (strategy instanceof AsyncWriteStrategy) {
                 ((AsyncWriteStrategy) strategy).shutdown();
+            } else if (strategy instanceof SyncWriteStrategy) {
+                ((SyncWriteStrategy) strategy).shutdown();
+            } else if (strategy instanceof SemiSyncWriteStrategy) {
+                ((SemiSyncWriteStrategy) strategy).shutdown();
             }
         }
         clear();

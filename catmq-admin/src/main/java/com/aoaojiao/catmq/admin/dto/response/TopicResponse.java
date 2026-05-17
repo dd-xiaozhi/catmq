@@ -24,6 +24,9 @@ public class TopicResponse {
     @ApiModelProperty(value = "Topic 名称")
     private String topic;
 
+    @ApiModelProperty(value = "所属 Broker ID")
+    private String brokerId;
+
     @ApiModelProperty(value = "队列数量")
     private Integer queueCount;
 

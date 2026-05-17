@@ -71,7 +71,7 @@ catmq/store/
 
 ### 数据流
 1. `BrokerStartup.start()` → 初始化 `ConfigContext`
-2. `CatmqTopicLoader.loadTopicInfo()` → 从 JSON 加载 Topic 信息到 `CommonCache`
+2. `CatmqTopicLoader.load()` → 从 JSON 加载 Topic 信息到 `CommonCache`
 3. `CommitLogAppendHandler.prepareLoadingToMMap()` → 将 CommitLog 文件映射到内存
 4. `appendMessage()` → 追加消息到 MMap 映射的 CommitLog 文件
 5. 定时任务 → 将 `CommonCache` 中的变更写回 JSON 文件

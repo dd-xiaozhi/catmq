@@ -23,7 +23,7 @@ public class CommitLogAppendHandlerTest {
     public void init() {
         this.messageStoreConfig = new MessageStoreConfig();
         CatmqTopicLoader catmqTopicLoader = new CatmqTopicLoader(messageStoreConfig);
-        catmqTopicLoader.loadTopicInfo();
+        catmqTopicLoader.load();
     }
 
     @Test
