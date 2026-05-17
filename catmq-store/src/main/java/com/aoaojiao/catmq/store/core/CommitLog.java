@@ -62,11 +62,12 @@ public class CommitLog {
     /**
      * 写入消息到 commitLog 文件中
      * 判断 commitLog 文件是否已满，如果已满则需要创建新的 commitLog 文件
-     * TODO 目前先只写入消息体
+     * 写入完整消息格式：消息头 + 消息体
      *
      * @param message 消息模型，commitLog 最小数据单元
+     * @return 写入后的物理偏移量
      */
-    public void writeContent(Message message) {
+    public long writeContent(Message message) {
         Map<String, CatmqTopicModel> catmqTopicModelMap = CommonCache.getCatmqTopicModelMap();
         CatmqTopicModel catmqTopicModel = catmqTopicModelMap.get(this.topicName);
         if (catmqTopicModel == null) {
@@ -78,25 +79,41 @@ public class CommitLog {
             throw new RuntimeException("get commitLogModel error");
         }
 
+        // 计算消息总大小（包含消息头）
+        byte[] messageBytes = message.convertToBytes();
+        int messageSize = messageBytes.length;
+
         putMessageLock.lock();
-        checkIsCreateNewCommitLogFile(message, commitLogModel);
-        MMapUtil.writeContent(this.mappedByteBuffer, message.getContent());
-        putMessageLock.unlock();
+        try {
+            // 检查是否需要创建新文件（需要在写入前检查）
+            checkIsCreateNewCommitLogFile(messageSize, commitLogModel);
+
+            // 记录写入前的偏移量（物理偏移量）
+            long physicalOffset = commitLogModel.getOffset().get();
+
+            // 写入完整消息（包含消息头）
+            MMapUtil.writeContent(this.mappedByteBuffer, messageBytes);
+
+            // 更新偏移量
+            commitLogModel.addOffset(messageSize);
+
+            return physicalOffset;
+        } finally {
+            putMessageLock.unlock();
+        }
     }
 
     /**
      * 检查旧文件是否已经满，是否需要创建新的文件来存储
      *
-     * @param message   message
+     * @param messageSize       消息大小
      * @param commitLogModel commitLogModel
      */
-    private void checkIsCreateNewCommitLogFile(Message message,
+    private void checkIsCreateNewCommitLogFile(int messageSize,
                                                CommitLogModel commitLogModel) {
-        int messageSize = message.getContent().length;
-        commitLogModel.addOffset(messageSize);
         int offsetDiff = commitLogModel.offsetDiff();
-        if (offsetDiff <= 0) {
-            // 创建新的 commitLog 文件并映射到 MMap 中
+        if (messageSize > offsetDiff) {
+            // 消息大小超过剩余空间，需要创建新文件
             String newCommitLogFilename = getCommitLogNextFilename(commitLogModel.getFilename());
             commitLogModel.setFilename(newCommitLogFilename);
             commitLogModel.getOffset().set(messageSize);

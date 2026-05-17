@@ -22,7 +22,7 @@
             <groupId>com.catmq</groupId>
             <artifactId>catmq-common</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.catmq</groupId>
             <artifactId>catmq-store</artifactId>
@@ -31,6 +31,18 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+
+        <!-- 客户端 SDK 用于集成测试 -->
+        <dependency>
+            <groupId>com.catmq</groupId>
+            <artifactId>catmq-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
     </dependencies>
 

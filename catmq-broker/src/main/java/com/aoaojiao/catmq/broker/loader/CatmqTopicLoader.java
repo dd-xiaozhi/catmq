@@ -21,7 +21,7 @@ import java.util.concurrent.locks.LockSupport;
 @AllArgsConstructor
 public class CatmqTopicLoader {
 
-    private MessageStoreConfig messageStoreConfig;
+    private final MessageStoreConfig messageStoreConfig;
 
     public void loadTopicInfo() {
 
