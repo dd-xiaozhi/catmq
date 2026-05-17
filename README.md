@@ -1,20 +1,21 @@
 # catmq
 
-从0到1手写mq消息队列
-
-
+从0到1手写MQ消息队列
 
 
 
 **技术选型**：
 
-- Java8
-- Netty
+- Java 8
+- Netty 4.x
+- JUnit 4 (单元测试)
+- Spring Boot 3.x (管理控制台)
 
 
 
 # 实现内容
-## 文件存储模块设计（✅）
+
+## 文件存储模块设计（✅ 已完成）
 
 commitLog 文件结构设计：借鉴 RocketMQ commitLog 文件设计 和 Kafka 多副本设计两者结合
 ```text
@@ -88,7 +89,7 @@ commitLog自动扩容：commitLog 文件满了自动创建新的 commitLog 文�
 
 
 
-## consumerQueue 设计（✅）
+## consumerQueue 设计（✅ 已完成）
 
 consumerQueue 文件结构设计
 ```text
@@ -115,49 +116,141 @@ consumerQueue 根据索引定位拉取数据 ✅
 
 
 
-## nameServer 设计
+## nameServer 设计（✅ 已完成）
 
 借鉴 nacos 的设计思路落地 catmq 的 nameServer
 
+### 核心实现
 
+- **路由信息管理**：`RouteInfoManager` 维护 Broker 注册表、Topic 路由表，支持动态注册/注销
+- **心跳检测**：自动检测 Broker 存活状态，超时自动下线
+- **Topic 路由**：支持根据 Topic 查询可用的 Broker 列表
+- **持久化存储**：支持将路由信息持久化到 JSON 文件
 
-## 客户端SDK设计
-
-
-
-## broker高可用架构设计
-
-broker controller 节点选取
-
-broker 集群 ip 获取
-
-负载均衡算法实现
-
-主从节点数据同步
-- 异步刷新
-- 同步刷新
-- 半同步刷新
-
-主从切换
+> 相关类：`RouteInfoManager`、`NameServer`、`BrokerInfo`、`TopicRouteInfo`
 
 
 
-## 特殊消息设计
+## 客户端SDK设计（✅ 已完成）
 
-延迟消息
+### 生产者（MessageProducer）
 
-消息重试功能
+- **同步发送**：支持 String 和 byte[] 类型的消息发送
+- **异步发送**：支持回调函数，在发送完成时通知
+- **消息构建器**：提供 Builder 模式配置发送参数
+- **重试机制**：支持配置最大重试次数
 
-死信队列
+### 消费者（MessageConsumer）
 
-事务消息
+- **订阅机制**：支持按 Topic 和 QueueId 订阅消息
+- **消息拉取**：支持从指定偏移量拉取消息
+- **消费结果**：返回 SUCCESS/RETRY_LATER/SKIP 三种消费结果
+- **消费组支持**：支持消费者组概念
+
+> 相关类：`MessageProducer`、`MessageConsumer`、`ConnectionManager`、`ClientConfig`
 
 
 
-## 可视化管理控制平台设计
+## broker高可用架构设计（✅ 已完成）
 
-基本的api
+### 核心实现
 
-可观测指标
+- **Broker 节点管理**：`BrokerInfo` 维护节点信息，支持 MASTER/SLAVE/FOLLOWER 角色
+- **Controller 选举**：基于 ZooKeeper 实现 Master 选举
+- **负载均衡算法**：
+  - 轮询（ROUND_ROBIN）
+  - 随机（RANDOM）
+  - 一致性哈希（CONSISTENT_HASH）
+- **主从同步策略**：
+  - **异步刷新（ASYNC）**：主节点写入后立即返回，从节点异步同步
+  - **同步刷新（SYNC）**：主节点等待所有从节点写入成功才返回
+  - **半同步刷新（SEMI_SYNC）**：主节点等待至少 N 个从节点确认
 
-监控broker健康状态
+> 相关类：`SyncStrategy`、`SyncWriteStrategy`、`AsyncWriteStrategy`、`SemiSyncWriteStrategy`、`LoadBalancer`、`RoundRobinLoadBalancer`、`RandomLoadBalancer`、`ConsistentHashLoadBalancer`
+
+
+
+## 特殊消息设计（✅ 已完成）
+
+### 延迟消息（DelayMessage）
+
+- **时间轮调度**：基于时间轮算法实现高效延迟任务调度
+- **多级时间轮**：支持秒级和毫秒级精度的时间轮
+- **延迟持久化**：支持将延迟消息持久化到磁盘，重启后可恢复
+
+### 消息重试功能
+
+- **自动重试**：消费失败后自动重试，支持配置最大重试次数
+- **重试间隔**：支持指数退避策略
+
+### 死信队列（DeadLetterQueue）
+
+- **死信消息存储**：消费失败超过最大重试次数后进入死信队列
+- **批量处理**：支持批量重试或删除死信消息
+- **死信原因记录**：记录原始消息ID、死信原因、重试次数等信息
+
+### 事务消息（TransactionMessage）
+
+- **Half 消息**：事务开启时先发送 Prepared 消息
+- **本地事务**：支持用户自定义本地事务执行逻辑
+- **提交/回滚**：根据本地事务结果提交或回滚事务
+- **事务状态**：PREPARED → END（COMMITED/ROLLED_BACK）
+
+> 相关类：`DelayMessageService`、`DeadLetterQueueService`、`TransactionMessageService`、`TimeWheel`
+
+
+
+## 可视化管理控制平台设计（✅ 已完成）
+
+基于 Spring Boot 3.x 构建的管理控制台
+
+### API 接口
+
+- **Broker 状态查询**：`GET /api/v1/broker/status`
+- **Broker 心跳查询**：`GET /api/v1/broker/heartbeat`
+- **Broker 配置查询**：`GET /api/v1/broker/config`
+
+### 监控指标
+
+- **JVM 内存信息**：堆内存/非堆内存使用情况
+- **线程信息**：活跃线程数、峰值线程数
+- **GC 信息**：GC 次数、耗时
+- **文件描述符**：打开的 FD 数量
+
+> 相关类：`BrokerController`、`BrokerService`、`MetricsService`、`BrokerStatusResponse`
+
+
+
+# 项目结构
+
+```
+catmq/
+├── catmq-common/          # 公共模块（缓存、工具类）
+├── catmq-store/           # 存储模块（CommitLog、ConsumerQueue）
+├── catmq-client/          # 客户端SDK（生产者、消费者）
+├── catmq-broker/          # Broker核心实现
+├── catmq-nameserver/      # 名称服务
+├── catmq-cluster/        # 集群高可用
+└── catmq-admin/           # 管理控制台
+```
+
+
+
+# 测试覆盖
+
+项目包含完整的单元测试和集成测试，覆盖所有核心模块：
+
+- `TimeWheelTest` - 时间轮调度测试
+- `DelayMessageServiceTest` - 延迟消息服务测试
+- `TransactionMessageServiceTest` - 事务消息服务测试
+- `RouteInfoManagerTest` - 路由信息管理测试
+- `SyncStrategyTest` - 同步策略测试
+- `LoadBalancerTest` - 负载均衡测试
+- `MessageConsumerTest` - 消费者测试
+- `MessageProducerTest` - 生产者测试
+- `BrokerControllerTest` - 管理接口测试
+
+运行测试：
+```bash
+mvn test
+```
