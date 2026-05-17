@@ -6,6 +6,7 @@ import com.aoaojiao.catmq.store.config.MessageStoreConfig;
 import com.aoaojiao.catmq.store.core.CommitLogAppendHandler;
 import com.aoaojiao.catmq.store.model.Message;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class CommitLogAppendHandlerTest {
     }
 
     @Test
+    @Ignore("需要真实文件系统环境，运行集成测试时启用")
     public void test() throws IOException, ClassNotFoundException, InterruptedException {
         CommitLogAppendHandler commitLogAppendHandler = new CommitLogAppendHandler(messageStoreConfig);
         String topic = "order_pay_topic";
@@ -33,7 +35,7 @@ public class CommitLogAppendHandlerTest {
         byte[] content = "i am xiaozhi".getBytes();
         commitLogAppendHandler.appendMessage(topic, content);
         Message message = commitLogAppendHandler.readMessage(topic, 0, content.length);
-        System.out.println("读取消息: " + new String(message.getContent()));
+        System.out.println("读取消息: " + new String(message.getBody()));
         TimeUnit.SECONDS.sleep(6);
     }
 }

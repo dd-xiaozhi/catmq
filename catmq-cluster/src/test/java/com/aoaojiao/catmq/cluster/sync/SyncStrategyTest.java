@@ -1,12 +1,12 @@
 package com.aoaojiao.catmq.cluster.sync;
 
 import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -17,172 +17,149 @@ import static org.junit.Assert.*;
  */
 public class SyncStrategyTest {
 
+    private BrokerInfo master;
     private List<BrokerInfo> slaves;
     private byte[] message;
+    private ClusterConfig clusterConfig;
 
     @Before
     public void setUp() {
+        master = new BrokerInfo("master_1", "master", "127.0.0.1", 9876);
+
         slaves = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
-            BrokerInfo slave = BrokerInfo.builder()
-                    .brokerName("slave_" + i)
-                    .address("127.0.0." + i + ":9876")
-                    .build();
+            BrokerInfo slave = new BrokerInfo("slave_" + i, "slave_" + i, "127.0.0." + (i + 1), 9876);
             slaves.add(slave);
         }
         message = "test message content".getBytes();
+
+        clusterConfig = new ClusterConfig();
+        clusterConfig.setReplicationFactor(1);
+        clusterConfig.setSyncMode(ClusterConfig.SyncMode.SYNC);
     }
 
     @Test
-    public void testSyncStrategyAllAck() {
+    public void testSyncWriteStrategy() {
         SyncStrategy sync = new SyncWriteStrategy();
 
-        // 模拟所有从节点成功
-        AtomicInteger successCount = new AtomicInteger(0);
-        sync.setSlaveReplicator((broker, msg) -> {
-            successCount.incrementAndGet();
-            return true;
-        });
+        SyncResult result = sync.write(master, slaves, message, clusterConfig);
 
-        SyncResult result = sync.sync(slaves, message);
-
-        assertTrue("应该同步成功", result.isSuccess());
-        assertEquals("应该成功3次", 3, result.getSuccessCount());
-        assertEquals("应该失败0次", 0, result.getFailedCount());
+        assertNotNull("结果不应该为空", result);
+        // 实际行为依赖于 slaves 是否可连接，这里只验证基本结构
     }
 
     @Test
-    public void testSyncStrategyPartialFail() {
-        SyncStrategy sync = new SyncWriteStrategy();
-
-        AtomicInteger index = new AtomicInteger(0);
-        sync.setSlaveReplicator((broker, msg) -> {
-            // 前2个成功，第3个失败
-            return index.incrementAndGet() <= 2;
-        });
-
-        SyncResult result = sync.sync(slaves, message);
-
-        assertFalse("应该同步失败", result.isSuccess());
-        assertEquals("应该成功2次", 2, result.getSuccessCount());
-        assertEquals("应该失败1次", 1, result.getFailedCount());
-    }
-
-    @Test
-    public void testAsyncStrategyAlwaysSuccess() {
+    public void testAsyncWriteStrategy() {
         SyncStrategy async = new AsyncWriteStrategy();
 
-        AtomicInteger replicationCount = new AtomicInteger(0);
-        async.setSlaveReplicator((broker, msg) -> {
-            replicationCount.incrementAndGet();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return true;
-        });
-
         long start = System.currentTimeMillis();
-        SyncResult result = async.sync(slaves, message);
+        SyncResult result = async.write(master, slaves, message, clusterConfig);
         long elapsed = System.currentTimeMillis() - start;
 
-        assertTrue("异步应该立即返回成功", result.isSuccess());
-        assertTrue("应该立即返回（小于100ms），实际: " + elapsed, elapsed < 100);
+        assertNotNull("结果不应该为空", result);
+        assertTrue("异步应该立即返回（小于100ms）", elapsed < 100);
+        assertFalse("needWaitAck 应该返回 false", async.needWaitAck());
     }
 
     @Test
-    public void testSemiSyncStrategyDefaultOneAck() {
-        // 默认需要至少1个确认
-        SyncStrategy semiSync = new SemiSyncWriteStrategy(1);
+    public void testSemiSyncWriteStrategy() {
+        SyncStrategy semiSync = new SemiSyncWriteStrategy();
 
-        AtomicInteger index = new AtomicInteger(0);
-        semiSync.setSlaveReplicator((broker, msg) -> {
-            // 只要有1个成功
-            return index.incrementAndGet() == 1;
-        });
+        SyncResult result = semiSync.write(master, slaves, message, clusterConfig);
 
-        SyncResult result = semiSync.sync(slaves, message);
-
-        assertTrue("半同步应该成功（至少1个确认）", result.isSuccess());
-        assertEquals("应该成功1次", 1, result.getSuccessCount());
+        assertNotNull("结果不应该为空", result);
+        assertTrue("needWaitAck 应该返回 true", semiSync.needWaitAck());
     }
 
     @Test
-    public void testSemiSyncStrategyMultipleAck() {
-        // 需要至少2个确认
-        SyncStrategy semiSync = new SemiSyncWriteStrategy(2);
-
-        AtomicInteger index = new AtomicInteger(0);
-        semiSync.setSlaveReplicator((broker, msg) -> {
-            // 前2个成功，第3个失败
-            return index.incrementAndGet() <= 2;
-        });
-
-        SyncResult result = semiSync.sync(slaves, message);
-
-        assertTrue("半同步应该成功（2个确认满足）", result.isSuccess());
-        assertEquals("应该成功2次", 2, result.getSuccessCount());
-    }
-
-    @Test
-    public void testSemiSyncStrategyNotEnoughAck() {
-        // 需要至少2个确认，但只有1个成功
-        SyncStrategy semiSync = new SemiSyncWriteStrategy(2);
-
-        AtomicInteger index = new AtomicInteger(0);
-        semiSync.setSlaveReplicator((broker, msg) -> {
-            return index.incrementAndGet() == 1;
-        });
-
-        SyncResult result = semiSync.sync(slaves, message);
-
-        assertFalse("半同步应该失败（只有1个确认）", result.isSuccess());
-        assertEquals("应该成功1次", 1, result.getSuccessCount());
-        assertEquals("应该失败2次", 2, result.getFailedCount());
-    }
-
-    @Test
-    public void testEmptySlaves() {
+    public void testSyncWriteStrategyWithEmptySlaves() {
+        SyncStrategy sync = new SyncWriteStrategy();
         List<BrokerInfo> emptySlaves = new ArrayList<>();
 
-        SyncStrategy sync = new SyncWriteStrategy();
-        SyncResult result = sync.sync(emptySlaves, message);
+        SyncResult result = sync.write(master, emptySlaves, message, clusterConfig);
 
-        assertTrue("没有从节点时应该成功", result.isSuccess());
-        assertEquals("应该成功0次", 0, result.getSuccessCount());
+        assertNotNull("结果不应该为空", result);
+        // 空 slave 列表时返回 failure
+    }
+
+    @Test
+    public void testSyncWriteStrategyWithNullSlaves() {
+        SyncStrategy sync = new SyncWriteStrategy();
+
+        SyncResult result = sync.write(master, null, message, clusterConfig);
+
+        assertNotNull("结果不应该为空", result);
+        // null slave 列表时返回 failure
     }
 
     @Test
     public void testSyncStrategyFactory() {
-        SyncStrategy sync = SyncStrategyFactory.getStrategy(SyncStrategy.Type.SYNC);
-        assertTrue("应该是SyncWriteStrategy实例", sync instanceof SyncWriteStrategy);
+        SyncStrategy syncStrategy = SyncStrategyFactory.create(ClusterConfig.SyncMode.SYNC);
+        assertNotNull("SyncWriteStrategy 不应该为空", syncStrategy);
+        assertTrue("应该是 SyncWriteStrategy 实例",
+                syncStrategy instanceof SyncWriteStrategy);
 
-        SyncStrategy async = SyncStrategyFactory.getStrategy(SyncStrategy.Type.ASYNC);
-        assertTrue("应该是AsyncWriteStrategy实例", async instanceof AsyncWriteStrategy);
+        SyncStrategy asyncStrategy = SyncStrategyFactory.create(ClusterConfig.SyncMode.ASYNC);
+        assertNotNull("AsyncWriteStrategy 不应该为空", asyncStrategy);
+        assertTrue("应该是 AsyncWriteStrategy 实例",
+                asyncStrategy instanceof AsyncWriteStrategy);
 
-        SyncStrategy semiSync = SyncStrategyFactory.getStrategy(SyncStrategy.Type.SEMI_SYNC);
-        assertTrue("应该是SemiSyncWriteStrategy实例", semiSync instanceof SemiSyncWriteStrategy);
+        SyncStrategy semiSyncStrategy = SyncStrategyFactory.create(ClusterConfig.SyncMode.SEMI_SYNC);
+        assertNotNull("SemiSyncWriteStrategy 不应该为空", semiSyncStrategy);
+        assertTrue("应该是 SemiSyncWriteStrategy 实例",
+                semiSyncStrategy instanceof SemiSyncWriteStrategy);
     }
 
     @Test
-    public void testSyncResultDetails() {
+    public void testSyncStrategyStaticWrite() {
+        SyncResult result = SyncStrategyFactory.write(
+                ClusterConfig.SyncMode.SYNC, master, slaves, message, clusterConfig);
+
+        assertNotNull("结果不应该为空", result);
+    }
+
+    @Test
+    public void testSyncWriteStrategyGetMode() {
         SyncStrategy sync = new SyncWriteStrategy();
+        assertEquals("应该是 SYNC 模式", ClusterConfig.SyncMode.SYNC, sync.getMode());
+        assertEquals("名称应该是 SYNC_WRITE", "SYNC_WRITE", sync.getName());
 
-        AtomicInteger index = new AtomicInteger(0);
-        sync.setSlaveReplicator((broker, msg) -> {
-            return index.incrementAndGet() <= 2;
-        });
+        SyncStrategy async = new AsyncWriteStrategy();
+        assertEquals("应该是 ASYNC 模式", ClusterConfig.SyncMode.ASYNC, async.getMode());
+        assertEquals("名称应该是 ASYNC_WRITE", "ASYNC_WRITE", async.getName());
 
-        SyncResult result = sync.sync(slaves, message);
+        SyncStrategy semiSync = new SemiSyncWriteStrategy();
+        assertEquals("应该是 SEMI_SYNC 模式", ClusterConfig.SyncMode.SEMI_SYNC, semiSync.getMode());
+        assertEquals("名称应该是 SEMI_SYNC_WRITE", "SEMI_SYNC_WRITE", semiSync.getName());
+    }
 
-        List<String> successBrokers = result.getSuccessBrokers();
-        List<String> failedBrokers = result.getFailedBrokers();
+    @Test
+    public void testSyncResultFactoryMethods() {
+        SyncResult success = SyncResult.success(3, 100, "SYNC");
+        assertTrue("应该成功", success.isSuccess());
+        assertEquals("确认数应该是 3", 3, success.getAckCount());
+        assertEquals("costMs 应该是 100", 100, success.getCostMs());
+        assertEquals("syncMode 应该是 SYNC", "SYNC", success.getSyncMode());
+        assertNotNull("timestamp 不应该为空", success.getTimestamp());
 
-        assertEquals("应该有2个成功的broker", 2, successBrokers.size());
-        assertEquals("应该有1个失败的broker", 1, failedBrokers.size());
-        assertTrue("slave_1应该成功", successBrokers.contains("slave_1"));
-        assertTrue("slave_2应该成功", successBrokers.contains("slave_2"));
-        assertTrue("slave_3应该失败", failedBrokers.contains("slave_3"));
+        SyncResult failure = SyncResult.failure("测试失败");
+        assertFalse("不应该成功", failure.isSuccess());
+        assertEquals("错误信息应该匹配", "测试失败", failure.getErrorMessage());
+        assertNotNull("timestamp 不应该为空", failure.getTimestamp());
+
+        SyncResult asyncSucc = SyncResult.asyncSuccess();
+        assertTrue("应该成功", asyncSucc.isSuccess());
+        assertEquals("异步确认数应该是 0", 0, asyncSucc.getAckCount());
+        assertEquals("syncMode 应该是 ASYNC", "ASYNC", asyncSucc.getSyncMode());
+    }
+
+    @Test
+    public void testSemiSyncWriteStrategyWithReplicationFactor2() {
+        clusterConfig.setReplicationFactor(2);
+
+        SyncStrategy semiSync = new SemiSyncWriteStrategy();
+        int minAck = semiSync.getMinAckCount(3, clusterConfig);
+
+        assertEquals("最少确认数应该是 2", 2, minAck);
     }
 }

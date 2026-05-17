@@ -44,16 +44,6 @@ public class DelayMessageService {
     private MessageStoreConfig config;
 
     /**
-     * 时间轮（秒级精度）
-     */
-    private TimeWheel secondWheel;
-
-    /**
-     * 时间轮（毫秒级精度）
-     */
-    private TimeWheel milliWheel;
-
-    /**
      * 延迟消息持久化路径
      */
     private String delayMessageDir;
@@ -82,6 +72,24 @@ public class DelayMessageService {
      * 基础延迟时间（毫秒）
      */
     private static final long BASE_DELAY_MS = 1000;
+
+    /**
+     * 时间轮（秒级精度）
+     */
+    private TimeWheel secondWheel;
+
+    /**
+     * 时间轮（毫秒级精度）
+     */
+    private TimeWheel milliWheel;
+
+    /**
+     * 无参构造方法（用于测试）
+     */
+    public DelayMessageService() {
+        // 仅初始化时间轮，不进行持久化
+        initTimeWheel();
+    }
 
     /**
      * 初始化延迟消息服务
@@ -133,6 +141,10 @@ public class DelayMessageService {
      */
     public void start() {
         if (running.compareAndSet(false, true)) {
+            // 如果还未初始化（无参构造场景），则初始化时间轮
+            if (secondWheel == null || milliWheel == null) {
+                initTimeWheel();
+            }
             log.info("DelayMessageService started");
         }
     }
