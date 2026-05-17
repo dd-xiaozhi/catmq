@@ -1,0 +1,50 @@
+# CatMQ Admin 管理平台配置
+server:
+  port: 8080
+  servlet:
+    context-path: /admin
+
+spring:
+  application:
+    name: catmq-admin
+
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# 管理平台配置
+catmq:
+  admin:
+    # 指标采集间隔（毫秒）
+    metrics-collection-interval: 5000
+    # 告警检查间隔（毫秒）
+    alert-check-interval: 10000
+    # 健康检查间隔（毫秒）
+    health-check-interval: 30000
+
+# Spring Boot Actuator 配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# 日志配置
+logging:
+  level:
+    com.aoaojiao.catmq: INFO
+    org.springframework: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

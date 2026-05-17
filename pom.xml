@@ -15,6 +15,7 @@
         <module>catmq-client</module>
         <module>catmq-cluster</module>
         <module>catmq-store</module>
+        <module>catmq-admin</module>
     </modules>
 
     <properties>
@@ -30,6 +31,7 @@
         <fastjson2.version>2.0.43</fastjson2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <lombok.version>1.18.38</lombok.version>
+        <slf4j.version>1.7.36</slf4j.version>
 
         <!-- Test dependencies -->
         <junit.version>4.13.2</junit.version>
@@ -55,6 +57,20 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <!-- Mockito 用于 Mock 对象 -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>4.11.0</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- AssertJ 用于流畅断言 -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>3.24.2</version>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
@@ -64,6 +80,11 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <!-- model -->
@@ -90,6 +111,11 @@
             <dependency>
                 <groupId>com.catmq</groupId>
                 <artifactId>catmq-nameserver</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.catmq</groupId>
+                <artifactId>catmq-admin</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>

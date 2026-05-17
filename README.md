@@ -75,9 +75,20 @@ commitLog自动扩容：commitLog 文件满了自动创建新的 commitLog 文�
 
 启动预加载 commitLog 文件：在 broker 启动时加通过 topic-info 的信息可以预加载 commitLog 文件到内存中
 
+### 核心实现细节
+
+- **MMap 内存映射**：基于 `FileChannel.map()` 实现零拷贝写入，MappedByteBuffer 直接映射文件 I/O，性能远高于传统 Stream 方式
+- **写入并发控制**：`CommitLog` 使用 `PutMessageReentrantLock` 锁保护追加操作，保证多线程写入时数据不交叉
+- **消费进度持久化**：`consume-queue-offset.json` 记录每个消费者的消费偏移量，重启后自动恢复，继续消费
+- **定时刷盘机制**：后台线程每 3 秒将内存中的 Topic 元信息、消费偏移量刷入磁盘，防止异常宕机时数据丢失
+- **统一缓存层**：`CommonCache` 封装 Topic 列表、消费偏移量等热点数据，提供只读访问接口
+- **线程池管理**：`CommonThreadPool` 统一管理刷盘线程池，避免资源泄漏
+
+> 相关类：`CommitLog`、`MMapUtil`、`CommitLogAppendHandler`、`BrokerStartup`、`CatmqTopicLoader`、`ConsumeQueueOffsetLoader`、`CommonCache`、`CommonThreadPool`
 
 
-## consumerQueue 设计
+
+## consumerQueue 设计（✅）
 
 consumerQueue 文件结构设计
 ```text
@@ -89,9 +100,18 @@ consumerQueue
         - ........
 ```
 
-consumerQueue dispatch 分发器实现
+consumerQueue dispatch 分发器实现 ✅
 
-consumerQueue 根据索引定位拉取数据
+consumerQueue 根据索引定位拉取数据 ✅
+
+### 核心实现细节
+
+- **异步消息分发**：`DispatchMessageService` 将 CommitLog 写入的消息异步分发到 ConsumerQueue 索引，避免阻塞写入
+- **固定索引格式**：每条索引固定 20 字节（physicalOffset:8 + size:4 + tagCode:8），支持高效二分查找
+- **消息拉取**：`PullService` 根据逻辑 offset 从 ConsumerQueue 获取索引，再从 CommitLog 读取完整消息内容
+- **消费进度管理**：`CommonCache` 维护队列最大偏移量，支持消费进度跟踪
+
+> 相关类：`ConsumerQueue`、`ConsumerQueueManager`、`DispatchMessageService`、`PullService`、`CQIndex`
 
 
 

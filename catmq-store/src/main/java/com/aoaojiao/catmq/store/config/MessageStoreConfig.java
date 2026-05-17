@@ -7,7 +7,7 @@ import java.io.File;
 
 /**
  * @author DD
- *
+ * <p>
  * 消息存储配置
  */
 @Data
@@ -15,9 +15,10 @@ public class MessageStoreConfig {
 
     // 保存 commitLog 文件数据的根目录
     // TODO 先写死，后面修改从环境变量或者系统属性中获取
-     private String storePathRootDir = "/Users/xiaozhi/work/java/project/catmq/catmq/store";
-//    private String storePathRootDir = "D:\\Work\\project\\catmq\\catmq\\store";
+    //  private String storePathRootDir = "/Users/xiaozhi/work/java/project/catmq/catmq/store";
+    private String storePathRootDir = "D:\\Work\\project\\catmq\\catmq\\store";
     private String commitLogDirPath = storePathRootDir + File.separator + "commitLog";
+    private String consumeQueueDirPath = storePathRootDir + File.separator + "consumeQueue";
     private String topicInfoFilePath = storePathRootDir + File.separator + "catmq-topic.json";
     private String consumeQueueOffsetFilePath = storePathRootDir + File.separator + "consume-queue-offset.json";
 
