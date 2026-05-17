@@ -50,6 +50,18 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
+        <!-- Netty 网络通信 -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
+        <!-- 客户端模块（用于序列化） -->
+        <dependency>
+            <groupId>com.catmq</groupId>
+            <artifactId>catmq-client</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

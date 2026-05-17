@@ -48,6 +48,14 @@
             <version>${spring-boot.version}</version>
         </dependency>
 
+        
+        <!-- Spring Boot Mail（邮件通知支持） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+
         <!-- catmq 内部模块 -->
         <dependency>
             <groupId>com.catmq</groupId>
@@ -64,6 +72,7 @@
             <artifactId>catmq-broker</artifactId>
         </dependency>
 
+        
         <!-- 工具类 -->
         <dependency>
             <groupId>org.apache.commons</groupId>

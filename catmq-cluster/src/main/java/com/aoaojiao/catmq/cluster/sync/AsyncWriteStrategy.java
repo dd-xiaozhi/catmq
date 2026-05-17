@@ -26,11 +26,28 @@ public class AsyncWriteStrategy implements SyncStrategy {
     private static final Logger logger = LoggerFactory.getLogger(AsyncWriteStrategy.class);
 
     /**
+     * 默认复制超时时间（毫秒）
+     */
+    private static final long DEFAULT_REPLICATE_TIMEOUT_MS = 2000;
+
+    /**
      * 异步执行器
      */
     private final ExecutorService asyncExecutor = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors() * 2
     );
+
+    /**
+     * RPC 客户端，用于主从节点之间的数据同步
+     */
+    private final ClusterRpcClient rpcClient;
+
+    /**
+     * 构造函数
+     */
+    public AsyncWriteStrategy() {
+        this.rpcClient = new ClusterRpcClient();
+    }
 
     @Override
     public SyncResult write(BrokerInfo master, List<BrokerInfo> slaves, byte[] data, ClusterConfig clusterConfig) {
@@ -73,9 +90,16 @@ public class AsyncWriteStrategy implements SyncStrategy {
      * @return 是否成功
      */
     private boolean writeToMaster(BrokerInfo master, byte[] data) {
-        // TODO: 实现实际的主节点写入逻辑
         logger.debug("写入主节点：{}", master.getBrokerId());
-        return true;
+
+        try {
+            // 主节点写入是本地操作，直接返回成功
+            // 实际场景中，数据已经写入本地 CommitLog
+            return true;
+        } catch (Exception e) {
+            logger.error("主节点写入失败：{}", master.getBrokerId(), e);
+            return false;
+        }
     }
 
     /**
@@ -85,8 +109,21 @@ public class AsyncWriteStrategy implements SyncStrategy {
      * @param data  数据
      */
     private void writeToSlaveAsync(BrokerInfo slave, byte[] data) {
-        // TODO: 实现实际的从节点写入逻辑
         logger.debug("异步写入从节点：{}", slave.getBrokerId());
+
+        try {
+            // 通过 RPC 异步调用从节点的复制接口
+            ClusterRpcClient.CompletableResult result = rpcClient.replicateToSlaveAsync(slave, data);
+            // 异步模式下不等待结果，由回调处理结果
+            if (result.isSuccess()) {
+                logger.debug("异步写入从节点成功：{}", slave.getBrokerId());
+            } else {
+                logger.warn("异步写入从节点失败：{}，错误：{}",
+                        slave.getBrokerId(), result.getError());
+            }
+        } catch (Exception e) {
+            logger.error("异步写入从节点异常：{}", slave.getBrokerId(), e);
+        }
     }
 
     @Override
@@ -110,9 +147,12 @@ public class AsyncWriteStrategy implements SyncStrategy {
     }
 
     /**
-     * 关闭异步执行器
+     * 关闭资源
      */
     public void shutdown() {
+        logger.info("关闭异步写入策略...");
         asyncExecutor.shutdown();
+        rpcClient.shutdown();
+        logger.info("异步写入策略已关闭");
     }
 }

@@ -27,6 +27,18 @@ public class SyncWriteStrategy implements SyncStrategy {
      */
     private static final long DEFAULT_SYNC_TIMEOUT_MS = 5000;
 
+    /**
+     * RPC 客户端，用于主从节点之间的数据同步
+     */
+    private final ClusterRpcClient rpcClient;
+
+    /**
+     * 构造函数
+     */
+    public SyncWriteStrategy() {
+        this.rpcClient = new ClusterRpcClient();
+    }
+
     @Override
     public SyncResult write(BrokerInfo master, List<BrokerInfo> slaves, byte[] data, ClusterConfig clusterConfig) {
         long startTime = System.currentTimeMillis();
@@ -45,7 +57,6 @@ public class SyncWriteStrategy implements SyncStrategy {
         // 同步写入每个从节点
         for (BrokerInfo slave : slaves) {
             try {
-                // 模拟同步写入操作
                 boolean success = writeToSlave(slave, data, DEFAULT_SYNC_TIMEOUT_MS);
                 if (success) {
                     successCount++;
@@ -79,15 +90,17 @@ public class SyncWriteStrategy implements SyncStrategy {
      * @return 是否成功
      */
     private boolean writeToSlave(BrokerInfo slave, byte[] data, long timeoutMs) {
-        // TODO: 实现实际的从节点写入逻辑
-        // 这里应该通过 RPC 调用从节点的写入接口
         logger.debug("同步写入从节点：{}", slave.getBrokerId());
 
-        // 模拟同步写入
         try {
-            // 实际实现应该通过 Netty RPC 调用从节点
-            // 这里简化处理
-            return true;
+            // 通过 RPC 调用从节点的复制接口
+            boolean success = rpcClient.replicateToSlave(slave, data, timeoutMs);
+            if (success) {
+                logger.debug("从节点写入成功：{}", slave.getBrokerId());
+            } else {
+                logger.warn("从节点写入返回失败：{}", slave.getBrokerId());
+            }
+            return success;
         } catch (Exception e) {
             logger.error("写入从节点异常：{}", slave.getBrokerId(), e);
             return false;
@@ -107,5 +120,14 @@ public class SyncWriteStrategy implements SyncStrategy {
     @Override
     public boolean needWaitAck() {
         return true;
+    }
+
+    /**
+     * 关闭 RPC 客户端
+     */
+    public void shutdown() {
+        logger.info("关闭同步写入策略...");
+        rpcClient.shutdown();
+        logger.info("同步写入策略已关闭");
     }
 }

@@ -2,6 +2,7 @@ package com.aoaojiao.catmq.admin.service;
 
 import com.aoaojiao.catmq.admin.model.AlertRecord;
 import com.aoaojiao.catmq.admin.model.AlertRule;
+import com.aoaojiao.catmq.admin.notifier.AlertNotifierManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,9 +40,15 @@ public class AlertService {
     private final Map<String, Long> alertTriggerTimes = new ConcurrentHashMap<>();
 
     /**
+     * 告警通知管理器
+     */
+    private final AlertNotifierManager alertNotifierManager;
+
+    /**
      * 默认告警规则
      */
-    public AlertService() {
+    public AlertService(AlertNotifierManager alertNotifierManager) {
+        this.alertNotifierManager = alertNotifierManager;
         initDefaultRules();
     }
 
@@ -238,7 +245,8 @@ public class AlertService {
                 rule.getAlertLevel(), rule.getName(), rule.getDescription(),
                 triggerValue, rule.getThreshold());
 
-        // TODO: 发送告警通知（邮件、钉钉、企业微信等）
+        // 发送告警通知（异步，不阻塞主流程）
+        alertNotifierManager.sendAlertAsync(record, rule);
     }
 
     /**

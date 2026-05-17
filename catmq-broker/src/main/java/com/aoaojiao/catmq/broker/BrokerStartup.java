@@ -132,18 +132,18 @@ public class BrokerStartup {
      */
     private void initProperties() {
         this.catmqTopicLoader = new CatmqTopicLoader(this.configContext.getMessageStoreConfig());
-        this.catmqTopicLoader.loadTopicInfo();
+        this.catmqTopicLoader.load();
 
         this.consumeQueueOffsetLoader = new ConsumeQueueOffsetLoader(this.configContext.getMessageStoreConfig());
-        this.consumeQueueOffsetLoader.loadConsumeQueueOffsetInfo();
+        this.consumeQueueOffsetLoader.load();
     }
 
     /**
      * 启动任务线程
      */
     private void startTaskThread() {
-        this.catmqTopicLoader.startFlushTopicInfoThread();
-        this.consumeQueueOffsetLoader.startConsumeQueueOffsetInfoThread();
+        this.catmqTopicLoader.startFlushThread();
+        this.consumeQueueOffsetLoader.startFlushThread();
     }
 
     private void prepareCommitLogFileInMMap() {

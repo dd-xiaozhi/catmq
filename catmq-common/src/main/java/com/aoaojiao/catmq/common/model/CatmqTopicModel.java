@@ -19,10 +19,10 @@ public class CatmqTopicModel {
     private String topic;
 
     /**
-     * 率属于哪个 broker 的
-     * TODO 后面分布式的时候会用到
+     * 所属 Broker ID
+     * 用于分布式场景下标识 Topic 的归属 Broker
      */
-    // private String broker;
+    private String brokerId;
 
     /**
      * 主题对应的 commitLog 文件信息

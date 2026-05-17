@@ -108,6 +108,11 @@ public class ClusterConfig {
     private boolean haEnabled = true;
 
     /**
+     * 同步复制超时时间（毫秒）
+     */
+    private long syncTimeoutMs = 5000;
+
+    /**
      * 负载均衡策略枚举
      */
     public enum LoadBalanceStrategy {

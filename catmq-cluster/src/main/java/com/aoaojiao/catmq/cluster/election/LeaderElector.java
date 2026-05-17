@@ -3,6 +3,7 @@ package com.aoaojiao.catmq.cluster.election;
 import com.aoaojiao.catmq.cluster.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import com.aoaojiao.catmq.cluster.model.ClusterState;
+import lombok.Getter;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
@@ -63,7 +64,13 @@ public class LeaderElector implements Closeable {
 
     /**
      * 当前主节点信息
+     * -- GETTER --
+     *  获取当前主节点信息
+     *
+     * @return 主节点信息
+
      */
+    @Getter
     private volatile BrokerInfo currentLeader;
 
     /**
@@ -283,15 +290,6 @@ public class LeaderElector implements Closeable {
     }
 
     /**
-     * 获取当前主节点信息
-     *
-     * @return 主节点信息
-     */
-    public BrokerInfo getCurrentLeader() {
-        return currentLeader;
-    }
-
-    /**
      * 获取当前集群中所有参与者
      *
      * @return 参与者列表
@@ -341,24 +339,6 @@ public class LeaderElector implements Closeable {
      */
     public void removeListener(LeaderElectorListener listener) {
         listeners.remove(listener);
-    }
-
-    /**
-     * 获取集群状态
-     *
-     * @return 集群状态
-     */
-    public ClusterState getClusterState() {
-        return clusterState;
-    }
-
-    /**
-     * 获取 Curator 客户端
-     *
-     * @return Curator 客户端
-     */
-    public CuratorFramework getCuratorClient() {
-        return curatorClient;
     }
 
     /**

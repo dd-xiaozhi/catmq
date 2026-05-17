@@ -17,6 +17,19 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
 
+  # Spring Mail 配置（需要启用邮件通知时配置）
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: alert@catmq.com
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 # 管理平台配置
 catmq:
   admin:
@@ -26,6 +39,29 @@ catmq:
     alert-check-interval: 10000
     # 健康检查间隔（毫秒）
     health-check-interval: 30000
+    # 告警通知配置
+    alert:
+      notifier:
+        # 邮件通知配置
+        email:
+          enabled: false
+          from-address: alert@catmq.com
+          to-addresses:
+            - admin@catmq.com
+          smtp-host: smtp.example.com
+          smtp-port: 587
+          username: alert@catmq.com
+          password: ""
+        # 钉钉通知配置
+        dingtalk:
+          enabled: false
+          webhook-url: ""
+          secret: ""
+          at-mobiles: []
+        # 企业微信通知配置
+        wechat:
+          enabled: false
+          webhook-url: ""
 
 # Spring Boot Actuator 配置
 management:

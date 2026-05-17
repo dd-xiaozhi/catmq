@@ -45,6 +45,16 @@ public class ClientRequest {
     public static final int COMMIT_OFFSET = 3;
 
     /**
+     * 集群内部数据复制（主从同步）
+     */
+    public static final int REPLICATE_DATA = 4;
+
+    /**
+     * 集群内部数据复制确认（主从同步ACK）
+     */
+    public static final int REPLICATE_ACK = 5;
+
+    /**
      * 获取请求类型名称
      */
     public static String getTypeName(int type) {
@@ -55,6 +65,10 @@ public class ClientRequest {
                 return "PULL_MESSAGE";
             case COMMIT_OFFSET:
                 return "COMMIT_OFFSET";
+            case REPLICATE_DATA:
+                return "REPLICATE_DATA";
+            case REPLICATE_ACK:
+                return "REPLICATE_ACK";
             default:
                 return "UNKNOWN";
         }
