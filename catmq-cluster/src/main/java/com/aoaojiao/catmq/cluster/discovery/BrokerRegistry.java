@@ -1,6 +1,6 @@
 package com.aoaojiao.catmq.cluster.discovery;
 
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import com.aoaojiao.catmq.cluster.model.BrokerList;
 import com.alibaba.fastjson2.JSON;
@@ -136,7 +136,7 @@ public class BrokerRegistry {
         currentBroker.setWeight(100);
         currentBroker.setStartTime(System.currentTimeMillis());
         currentBroker.setLastHeartbeat(System.currentTimeMillis());
-        currentBroker.setAvailable(true);
+        currentBroker.setAlive(true);
 
         // 构建节点路径
         selfPath = registryPath + "/" + currentBroker.getBrokerId();

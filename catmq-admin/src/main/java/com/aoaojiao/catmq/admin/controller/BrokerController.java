@@ -2,7 +2,7 @@ package com.aoaojiao.catmq.admin.controller;
 
 import com.aoaojiao.catmq.admin.dto.response.ApiResponse;
 import com.aoaojiao.catmq.admin.dto.response.BrokerStatusResponse;
-import com.aoaojiao.catmq.admin.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.admin.service.BrokerService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

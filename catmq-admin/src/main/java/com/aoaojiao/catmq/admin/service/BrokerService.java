@@ -1,7 +1,7 @@
 package com.aoaojiao.catmq.admin.service;
 
 import com.aoaojiao.catmq.admin.dto.response.BrokerStatusResponse;
-import com.aoaojiao.catmq.admin.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -90,7 +90,7 @@ public class BrokerService {
     public BrokerInfo getHeartbeat() {
         BrokerInfo info = new BrokerInfo();
         info.setBrokerName("catmq-broker");
-        info.setStatus("RUNNING");
+        info.setStatus(BrokerInfo.BrokerStatus.RUNNING);
         info.setTimestamp(System.currentTimeMillis());
         info.setCpuUsage(getCpuUsage());
         info.setMemoryUsage(calculateMemoryUsagePercent(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage()));

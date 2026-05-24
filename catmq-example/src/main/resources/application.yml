@@ -1,0 +1,13 @@
+# CatMQ 示例工程配置
+
+# Broker 连接配置
+catmq:
+  broker:
+    address: localhost:9091
+
+# 日志配置
+logging:
+  level:
+    com.aoaojiao.catmq: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

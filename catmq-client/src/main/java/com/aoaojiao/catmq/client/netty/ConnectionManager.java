@@ -43,7 +43,9 @@ public class ConnectionManager {
                 client.connect();
             } catch (Exception e) {
                 log.error("Failed to connect to broker: {}", config.getBrokerAddress(), e);
-                throw new RuntimeException("Failed to connect to broker", e);
+                // 连接失败时从池中移除无效的客户端
+                clientPool.remove(key);
+                throw new RuntimeException("Connection to broker failed: " + e.getMessage(), e);
             }
         }
 

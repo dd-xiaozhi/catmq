@@ -4,7 +4,7 @@ import com.aoaojiao.catmq.admin.dto.request.TopicCreateRequest;
 import com.aoaojiao.catmq.admin.dto.response.*;
 import com.aoaojiao.catmq.admin.model.AlertRecord;
 import com.aoaojiao.catmq.admin.model.AlertRule;
-import com.aoaojiao.catmq.admin.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.HttpMessageConverter;

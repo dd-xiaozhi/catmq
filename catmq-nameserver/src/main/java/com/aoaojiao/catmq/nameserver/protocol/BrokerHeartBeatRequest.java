@@ -3,6 +3,8 @@ package com.aoaojiao.catmq.nameserver.protocol;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * Broker 心跳请求
  *
@@ -30,10 +32,10 @@ public class BrokerHeartBeatRequest extends BaseRequest {
     /**
      * Broker 序号
      */
-    private int brokerId;
+    private String brokerId;
 
     /**
      * 当前该 Broker 管理的 Topic 列表（可能发生变化）
      */
-    private String[] topicList;
+    private List<String> topicList;
 }

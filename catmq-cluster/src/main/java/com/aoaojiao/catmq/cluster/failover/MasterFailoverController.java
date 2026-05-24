@@ -2,7 +2,7 @@ package com.aoaojiao.catmq.cluster.failover;
 
 import com.aoaojiao.catmq.cluster.election.LeaderElector;
 import com.aoaojiao.catmq.cluster.election.LeaderElectorListener;
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import com.aoaojiao.catmq.cluster.model.BrokerList;
 import org.apache.curator.framework.CuratorFramework;
@@ -272,8 +272,8 @@ public class MasterFailoverController implements LeaderElectorListener {
     private boolean isLocalBroker(BrokerInfo broker) {
         return broker != null
                 && broker.getBrokerId().equals(clusterConfig.getBrokerId())
-                && broker.getHost().equals(clusterConfig.getHost())
-                && broker.getPort() == clusterConfig.getPort();
+                && broker.getBrokerIp().equals(clusterConfig.getHost())
+                && broker.getBrokerPort() == clusterConfig.getPort();
     }
 
     /**

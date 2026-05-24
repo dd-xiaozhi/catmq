@@ -1,6 +1,6 @@
 package com.aoaojiao.catmq.cluster.failover;
 
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 
 /**
  * 主从切换监听器

@@ -1,5 +1,6 @@
 package com.aoaojiao.catmq.cluster.model;
 
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import lombok.Data;
 
 /**
@@ -95,7 +96,7 @@ public class ClusterState {
             return 0;
         }
         return (int) brokerList.getAll().stream()
-                .filter(BrokerInfo::isAvailable)
+                .filter(BrokerInfo::isAlive)
                 .count();
     }
 }

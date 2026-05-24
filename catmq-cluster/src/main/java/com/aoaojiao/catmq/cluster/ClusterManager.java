@@ -8,7 +8,7 @@ import com.aoaojiao.catmq.cluster.failover.MasterFailoverController;
 import com.aoaojiao.catmq.cluster.failover.MasterFailoverListener;
 import com.aoaojiao.catmq.cluster.loadbalance.LoadBalancer;
 import com.aoaojiao.catmq.cluster.loadbalance.LoadBalancerFactory;
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.BrokerList;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import com.aoaojiao.catmq.cluster.model.ClusterState;

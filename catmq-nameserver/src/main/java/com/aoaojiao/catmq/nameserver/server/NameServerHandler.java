@@ -1,7 +1,7 @@
 package com.aoaojiao.catmq.nameserver.server;
 
 import com.aoaojiao.catmq.nameserver.config.NameServerConfig;
-import com.aoaojiao.catmq.nameserver.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.nameserver.model.TopicRouteInfo;
 import com.aoaojiao.catmq.nameserver.protocol.*;
 import com.aoaojiao.catmq.nameserver.service.RouteInfoManager;

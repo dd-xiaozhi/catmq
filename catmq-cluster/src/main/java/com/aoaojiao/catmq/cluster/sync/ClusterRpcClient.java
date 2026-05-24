@@ -4,7 +4,7 @@ import com.aoaojiao.catmq.client.model.ClientRequest;
 import com.aoaojiao.catmq.client.model.ClientResponse;
 import com.aoaojiao.catmq.client.netty.RequestEncoder;
 import com.aoaojiao.catmq.client.netty.ResponseDecoder;
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;

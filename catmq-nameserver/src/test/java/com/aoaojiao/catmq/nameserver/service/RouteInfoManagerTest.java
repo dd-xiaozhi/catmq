@@ -1,11 +1,12 @@
 package com.aoaojiao.catmq.nameserver.service;
 
 import com.aoaojiao.catmq.nameserver.config.NameServerConfig;
-import com.aoaojiao.catmq.nameserver.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,7 @@ public class RouteInfoManagerTest {
         BrokerInfo broker = createBrokerInfo("broker_heartbeat", "127.0.0.1", 9876, 1);
         routeInfoManager.registerBroker(broker);
 
-        long beforeTime = routeInfoManager.getBrokerInfo("broker_heartbeat").getLastUpdateTimestamp();
+        long beforeTime = routeInfoManager.getBrokerInfo("broker_heartbeat").getLastHeartbeat();
 
         try {
             Thread.sleep(10);
@@ -85,7 +86,7 @@ public class RouteInfoManagerTest {
         boolean success = routeInfoManager.heartBeat("broker_heartbeat", null);
         assertTrue("心跳更新应该成功", success);
 
-        long afterTime = routeInfoManager.getBrokerInfo("broker_heartbeat").getLastUpdateTimestamp();
+        long afterTime = routeInfoManager.getBrokerInfo("broker_heartbeat").getLastHeartbeat();
         assertTrue("时间应该更新", afterTime > beforeTime);
     }
 
@@ -127,7 +128,7 @@ public class RouteInfoManagerTest {
     @Test
     public void testGetBrokerListByTopic() {
         BrokerInfo broker = createBrokerInfo("broker_topic", "127.0.0.1", 9876, 0);
-        broker.setTopicList(new String[]{"test_topic"});
+        broker.setTopicList(Arrays.asList("test_topic"));
         routeInfoManager.registerBroker(broker);
 
         List<BrokerInfo> brokers = routeInfoManager.getBrokerListByTopic("test_topic");
@@ -144,7 +145,7 @@ public class RouteInfoManagerTest {
     @Test
     public void testGetTopicRouteInfo() {
         BrokerInfo broker = createBrokerInfo("broker_route", "127.0.0.1", 9876, 0);
-        broker.setTopicList(new String[]{"test_topic"});
+        broker.setTopicList(Arrays.asList("test_topic"));
         routeInfoManager.registerBroker(broker);
 
         com.aoaojiao.catmq.nameserver.model.TopicRouteInfo routeInfo = routeInfoManager.getTopicRouteInfo("test_topic");
@@ -176,11 +177,11 @@ public class RouteInfoManagerTest {
     @Test
     public void testGetAllTopics() {
         BrokerInfo broker1 = createBrokerInfo("broker_topics_1", "127.0.0.1", 9876, 1);
-        broker1.setTopicList(new String[]{"topic_a", "topic_b"});
+        broker1.setTopicList(Arrays.asList("topic_a", "topic_b"));
         routeInfoManager.registerBroker(broker1);
 
         BrokerInfo broker2 = createBrokerInfo("broker_topics_2", "127.0.0.2", 9876, 2);
-        broker2.setTopicList(new String[]{"topic_b", "topic_c"});
+        broker2.setTopicList(Arrays.asList("topic_b", "topic_c"));
         routeInfoManager.registerBroker(broker2);
 
         Set<String> topics = routeInfoManager.getAllTopics();
@@ -210,10 +211,10 @@ public class RouteInfoManagerTest {
         broker.setBrokerName(name);
         broker.setBrokerIp(ip);
         broker.setBrokerPort(port);
-        broker.setBrokerId(brokerId);
+        broker.setBrokerId(String.valueOf(brokerId));
         broker.setWeight(100);
         broker.setClusterName("default-cluster");
-        broker.setLastUpdateTimestamp(System.currentTimeMillis());
+        broker.setLastHeartbeat(System.currentTimeMillis());
         broker.setAlive(true);
         return broker;
     }

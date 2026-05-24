@@ -100,6 +100,18 @@ public class MessageProducer {
     }
 
     /**
+     * 同步发送消息（带标签，字符串消息体）
+     *
+     * @param topic  主题
+     * @param body   消息内容
+     * @param tags   标签（可选）
+     * @return 发送结果
+     */
+    public SendMessageResponse send(String topic, String body, String tags) {
+        return send(topic, body.getBytes(StandardCharsets.UTF_8), tags);
+    }
+
+    /**
      * 同步发送消息（带标签）
      *
      * @param topic  主题

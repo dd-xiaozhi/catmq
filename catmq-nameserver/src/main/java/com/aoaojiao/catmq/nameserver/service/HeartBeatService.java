@@ -1,7 +1,7 @@
 package com.aoaojiao.catmq.nameserver.service;
 
 import com.aoaojiao.catmq.nameserver.config.NameServerConfig;
-import com.aoaojiao.catmq.nameserver.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class HeartBeatService {
                     continue;
                 }
 
-                long timeDiff = currentTime - brokerInfo.getLastUpdateTimestamp();
+                long timeDiff = currentTime - brokerInfo.getLastHeartbeat();
                 if (timeDiff > timeout) {
                     // Broker 心跳超时，标记为不存活
                     brokerInfo.setAlive(false);

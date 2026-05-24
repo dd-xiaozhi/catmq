@@ -1,6 +1,6 @@
 package com.aoaojiao.catmq.cluster.sync;
 
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

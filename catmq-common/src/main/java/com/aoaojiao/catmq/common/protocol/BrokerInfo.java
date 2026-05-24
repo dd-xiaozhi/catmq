@@ -1,4 +1,4 @@
-package com.aoaojiao.catmq.nameserver.model;
+package com.aoaojiao.catmq.common.protocol;
 
 import lombok.Data;
 

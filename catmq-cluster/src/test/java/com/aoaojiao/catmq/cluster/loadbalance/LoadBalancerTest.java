@@ -1,6 +1,6 @@
 package com.aoaojiao.catmq.cluster.loadbalance;
 
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 import org.junit.Before;
 import org.junit.Test;

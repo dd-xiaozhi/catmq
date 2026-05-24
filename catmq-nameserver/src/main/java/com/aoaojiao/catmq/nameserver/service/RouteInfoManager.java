@@ -1,7 +1,7 @@
 package com.aoaojiao.catmq.nameserver.service;
 
 import com.aoaojiao.catmq.nameserver.config.NameServerConfig;
-import com.aoaojiao.catmq.nameserver.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.nameserver.model.TopicRouteInfo;
 import com.alibaba.fastjson2.JSON;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class RouteInfoManager {
         }
 
         String brokerName = brokerInfo.getBrokerName();
-        brokerInfo.setLastUpdateTimestamp(System.currentTimeMillis());
+        brokerInfo.setLastHeartbeat(System.currentTimeMillis());
         brokerInfo.setAlive(true);
 
         // 1. 更新 Broker 注册表
@@ -109,7 +109,7 @@ public class RouteInfoManager {
      * @param topicList   Broker 当前管理的 Topic 列表
      * @return true: Broker 存活且已更新, false: Broker 不存在
      */
-    public boolean heartBeat(String brokerName, String[] topicList) {
+    public boolean heartBeat(String brokerName, List<String> topicList) {
         BrokerInfo brokerInfo = brokerTable.get(brokerName);
         if (brokerInfo == null) {
             log.warn("Broker {} not found during heart beat", brokerName);
@@ -117,7 +117,7 @@ public class RouteInfoManager {
         }
 
         // 更新心跳时间
-        brokerInfo.setLastUpdateTimestamp(System.currentTimeMillis());
+        brokerInfo.setLastHeartbeat(System.currentTimeMillis());
         brokerInfo.setAlive(true);
 
         // 更新 Topic 列表（可能发生变化）
@@ -130,7 +130,7 @@ public class RouteInfoManager {
             }
         }
 
-        log.debug("Broker {} heart beat updated at {}", brokerName, brokerInfo.getLastUpdateTimestamp());
+        log.debug("Broker {} heart beat updated at {}", brokerName, brokerInfo.getLastHeartbeat());
         return true;
     }
 
@@ -145,7 +145,7 @@ public class RouteInfoManager {
             clusterBrokerList.remove(brokerName);
 
             // 清除该 Broker 相关的路由信息
-            String[] topics = removed.getTopicList();
+            List<String> topics = removed.getTopicList();
             if (topics != null) {
                 for (String topic : topics) {
                     CopyOnWriteArrayList<BrokerInfo> brokers = topicRouteTable.get(topic);
@@ -181,7 +181,7 @@ public class RouteInfoManager {
         // 转换为普通列表（避免序列化 CopyOnWriteArrayList）
         routeInfo.setBrokerInfoList(new ArrayList<>(brokers));
         routeInfo.setQueueCount(brokers.get(0).getTopicList() != null ?
-            brokers.get(0).getTopicList().length : 4);
+            brokers.get(0).getTopicList().size() : 4);
         routeInfo.setUpdateTimestamp(System.currentTimeMillis());
         return routeInfo;
     }

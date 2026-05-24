@@ -1,5 +1,7 @@
 package com.aoaojiao.catmq.cluster.model;
 
+import com.aoaojiao.catmq.common.model.BrokerInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -86,7 +88,7 @@ public class BrokerList {
     public List<BrokerInfo> getActiveBrokers() {
         List<BrokerInfo> activeBrokers = new ArrayList<>();
         for (BrokerInfo broker : brokers) {
-            if (broker.isAvailable() && broker.getStatus() == BrokerInfo.BrokerStatus.ACTIVE) {
+            if (broker.isAlive() && broker.getStatus() == BrokerInfo.BrokerStatus.ACTIVE) {
                 activeBrokers.add(broker);
             }
         }
@@ -100,7 +102,7 @@ public class BrokerList {
      */
     public BrokerInfo getMaster() {
         for (BrokerInfo broker : brokers) {
-            if (broker.getRole() == BrokerInfo.BrokerRole.MASTER && broker.isAvailable()) {
+            if (broker.getRole() == BrokerInfo.BrokerRole.MASTER && broker.isAlive()) {
                 return broker;
             }
         }
@@ -115,7 +117,7 @@ public class BrokerList {
     public List<BrokerInfo> getSlaves() {
         List<BrokerInfo> slaves = new ArrayList<>();
         for (BrokerInfo broker : brokers) {
-            if (broker.getRole() == BrokerInfo.BrokerRole.SLAVE && broker.isAvailable()) {
+            if (broker.getRole() == BrokerInfo.BrokerRole.SLAVE && broker.isAlive()) {
                 slaves.add(broker);
             }
         }

@@ -1,19 +1,27 @@
-package com.aoaojiao.catmq.cluster.model;
+package com.aoaojiao.catmq.common.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Broker 节点信息
- * 描述集群中每个 broker 节点的基本信息
+ * Broker 信息
+ * 统一所有模块的 BrokerInfo 定义
  *
  * @author DD
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BrokerInfo {
+@Builder
+public class BrokerInfo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * Broker 唯一标识
@@ -26,14 +34,14 @@ public class BrokerInfo {
     private String brokerName;
 
     /**
-     * Broker 主机地址
+     * Broker IP 地址
      */
-    private String host;
+    private String brokerIp;
 
     /**
      * Broker 端口
      */
-    private int port;
+    private int brokerPort;
 
     /**
      * 节点角色：MASTER / SLAVE / FOLLOWER
@@ -41,9 +49,14 @@ public class BrokerInfo {
     private BrokerRole role;
 
     /**
-     * Broker 状态：ACTIVE / INACTIVE / READONLY
+     * Broker 状态：ACTIVE / INACTIVE / READONLY / RUNNING
      */
     private BrokerStatus status;
+
+    /**
+     * Broker 集群名称
+     */
+    private String clusterName;
 
     /**
      * 权重（用于负载均衡）
@@ -61,38 +74,82 @@ public class BrokerInfo {
     private long lastHeartbeat;
 
     /**
-     * Broker 是否可用
+     * Broker 是否存活
      */
-    private boolean available;
+    private boolean alive;
+
+    /**
+     * CPU 使用率
+     */
+    private Double cpuUsage;
+
+    /**
+     * 内存使用率
+     */
+    private Double memoryUsage;
+
+    /**
+     * 磁盘使用率
+     */
+    private Double diskUsage;
+
+    /**
+     * 活跃连接数
+     */
+    private Integer activeConnections;
+
+    /**
+     * Topic 数量
+     */
+    private Integer topicCount;
+
+    /**
+     * 该 Broker 上管理的 Topic 列表
+     */
+    private List<String> topicList;
+
+    /**
+     * 消息发送速率
+     */
+    private Double sendRate;
+
+    /**
+     * 消息消费速率
+     */
+    private Double consumeRate;
+
+    /**
+     * 时间戳（lastHeartbeat 的别名，用于兼容旧代码）
+     */
+    private Long timestamp;
 
     /**
      * 构造函数
      *
      * @param brokerId Broker ID
      * @param brokerName Broker 名称
-     * @param host 主机地址
-     * @param port 端口
+     * @param brokerIp Broker IP
+     * @param brokerPort Broker 端口
      */
-    public BrokerInfo(String brokerId, String brokerName, String host, int port) {
+    public BrokerInfo(String brokerId, String brokerName, String brokerIp, int brokerPort) {
         this.brokerId = brokerId;
         this.brokerName = brokerName;
-        this.host = host;
-        this.port = port;
+        this.brokerIp = brokerIp;
+        this.brokerPort = brokerPort;
         this.role = BrokerRole.SLAVE;
         this.status = BrokerStatus.ACTIVE;
         this.weight = 100;
         this.startTime = System.currentTimeMillis();
         this.lastHeartbeat = System.currentTimeMillis();
-        this.available = true;
+        this.alive = true;
+        this.topicList = new ArrayList<>();
     }
 
     /**
-     * 获取 Broker 地址
-     *
-     * @return 地址字符串 (host:port)
+     * 构造完整的地址: ip:port
      */
     public String getAddress() {
-        return host + ":" + port;
+        return brokerIp + ":" + brokerPort;
     }
 
     /**
@@ -149,6 +206,11 @@ public class BrokerInfo {
         /**
          * 只读：可以处理读请求，但不能写入
          */
-        READONLY
+        READONLY,
+
+        /**
+         * 运行中
+         */
+        RUNNING
     }
 }

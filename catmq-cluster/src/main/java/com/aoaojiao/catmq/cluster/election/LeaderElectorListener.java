@@ -1,6 +1,6 @@
 package com.aoaojiao.catmq.cluster.election;
 
-import com.aoaojiao.catmq.cluster.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.cluster.model.ClusterConfig;
 
 /**
