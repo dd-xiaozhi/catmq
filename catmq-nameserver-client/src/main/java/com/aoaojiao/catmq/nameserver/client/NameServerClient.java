@@ -3,7 +3,7 @@ package com.aoaojiao.catmq.nameserver.client;
 import com.aoaojiao.catmq.common.protocol.BaseRequest;
 import com.aoaojiao.catmq.common.protocol.BaseResponse;
 import com.aoaojiao.catmq.common.protocol.BrokerHeartBeatRequest;
-import com.aoaojiao.catmq.nameserver.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.common.protocol.BrokerRegisterRequest;
 import com.aoaojiao.catmq.common.protocol.NettyMessage;
 import com.aoaojiao.catmq.common.protocol.RequestType;

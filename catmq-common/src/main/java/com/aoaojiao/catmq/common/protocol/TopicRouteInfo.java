@@ -1,5 +1,6 @@
 package com.aoaojiao.catmq.common.protocol;
 
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import lombok.Data;
 
 import java.io.Serializable;

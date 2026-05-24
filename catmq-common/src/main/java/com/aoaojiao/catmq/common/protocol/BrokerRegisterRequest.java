@@ -1,7 +1,12 @@
 package com.aoaojiao.catmq.common.protocol;
 
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Broker 注册请求
@@ -30,7 +35,7 @@ public class BrokerRegisterRequest extends BaseRequest {
     /**
      * Broker 序号
      */
-    private int brokerId;
+    private String brokerId;
 
     /**
      * Broker 权重
@@ -45,7 +50,7 @@ public class BrokerRegisterRequest extends BaseRequest {
     /**
      * 该 Broker 管理的 Topic 列表
      */
-    private String[] topicList;
+    private List<String> topicList;
 
     /**
      * 从 BrokerInfo 构造注册请求
@@ -58,7 +63,7 @@ public class BrokerRegisterRequest extends BaseRequest {
         request.setBrokerId(brokerInfo.getBrokerId());
         request.setWeight(brokerInfo.getWeight());
         request.setClusterName(brokerInfo.getClusterName());
-        request.setTopicList(brokerInfo.getTopicList());
+        request.setTopicList(brokerInfo.getTopicList() != null ? brokerInfo.getTopicList() : new ArrayList<>());
         return request;
     }
 

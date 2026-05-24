@@ -1,6 +1,6 @@
 package com.aoaojiao.catmq.nameserver.client;
 
-import com.aoaojiao.catmq.nameserver.model.BrokerInfo;
+import com.aoaojiao.catmq.common.model.BrokerInfo;
 import com.aoaojiao.catmq.nameserver.model.TopicRouteInfo;
 import com.aoaojiao.catmq.nameserver.protocol.*;
 import com.aoaojiao.catmq.nameserver.server.NettyMessageDecoder;
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -161,8 +162,8 @@ public class NameServerClient extends SimpleChannelInboundHandler<NettyMessage> 
         request.setBrokerName(brokerName);
         request.setBrokerIp("127.0.0.1");
         request.setBrokerPort(10911);
-        request.setBrokerId(1);
-        request.setTopicList(topicList);
+        request.setBrokerId("1");
+        request.setTopicList(Arrays.asList(topicList));
 
         ResponseFuture future = new ResponseFuture(request.getRequestId());
         responseMap.put(request.getRequestId().hashCode(), future);

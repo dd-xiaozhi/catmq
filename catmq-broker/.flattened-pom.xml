@@ -3,24 +3,18 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.catmq</groupId>
-  <artifactId>catmq-client</artifactId>
+  <artifactId>catmq-broker</artifactId>
   <version>1.0-SNAPSHOT</version>
   <dependencies>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.1.119.Final</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.alibaba.fastjson2</groupId>
-      <artifactId>fastjson2</artifactId>
-      <version>2.0.43</version>
+      <groupId>com.catmq</groupId>
+      <artifactId>catmq-common</artifactId>
+      <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.catmq</groupId>
-      <artifactId>catmq-common</artifactId>
+      <artifactId>catmq-store</artifactId>
       <version>1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
